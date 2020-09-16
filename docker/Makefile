@@ -1,17 +1,24 @@
 .PHONY: backup build clean run
 
 build: Makefile
+	# build vue.js app via npm and make
+	rm -rf ../client/build
+	cd ../client && npm install
+	cd ../client && $(MAKE)
+	# copy all source folders to this folder to build docker image
 	rm -rf server ntg_common
 	cp -a ../server ../ntg_common .
 	cp -a ../client/build/* ./client
 	cp -a ../scripts/cceh/* ./scripts
-	docker build -f Dockerfile.db --tag=cceh/ntg-db-server  .
-	docker build -f Dockerfile    --tag=cceh/ntg-app-server .
+	# we need two dockerfiles, one for the db and one for the server
+	docker build -f Dockerfile.db --tag=intf/ntg-db-server  .
+	docker build -f Dockerfile    --tag=intf/ntg-app-server .
 
+# this command only works on a production server with a fully functional database
 backup:
-	mkdir -p backup
-	pg_dump --format custom acts_ph4 -n ntg -T "ntg.original_*" -T "ntg.tmp_*" \
-			--exclude-table-data="ntg.notes*" > backup/acts_ph4.dump
+	mkdir -p /tmp/backup
+	pg_dump --format custom mark_ph31 -n ntg -T "ntg.original_*" -T "ntg.tmp_*" \
+			--exclude-table-data="ntg.notes*" > /tmp/backup/mark_ph31.dump
 
 run: build
 	docker-compose up
@@ -19,11 +26,12 @@ run: build
 cbgm: build
 	docker-compose run ntg-app-server cbgm
 
-push:
-	cat ~/.dockerhubpass | docker login --username marcelloperathoner --password-stdin
-	docker push cceh/ntg-app-server:latest
-	docker push cceh/ntg-db-server:latest
-	docker logout
+# TODO integrate in gitlab registry of wwu.it
+# push:
+# 	cat ~/.dockerhubpass | docker login --username marcelloperathoner --password-stdin
+# 	docker push cceh/ntg-app-server:latest
+# 	docker push cceh/ntg-db-server:latest
+# 	docker logout
 
 clean:
 	docker container stop $$(docker container ls -a -q)

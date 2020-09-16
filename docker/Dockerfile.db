@@ -1,5 +1,7 @@
 FROM postgres:12
 
 # basically this is a container that restores a database dump
+# TODO currently, the dump is shipped along in /docker/backup, in the long run
+# we need to provide a hosting for the current db dump
 COPY ./backup/                     /backup/
 COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/

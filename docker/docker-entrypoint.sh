@@ -12,5 +12,5 @@ if [ "$1" = 'cbgm' ]; then
     echo "*************************"
     echo "* Running the CBGM ...  *"
     echo "*************************"
-    exec python3 -m scripts.cbgm -vvv instance/acts_ph4.conf
+    exec python3 -m scripts.cbgm -vvv instance/mark_ph31.conf
 fi

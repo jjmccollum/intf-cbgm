@@ -34,6 +34,7 @@ lib/
 lib64/
 parts/
 sdist/
+venv/
 var/
 *.egg-info/
 .installed.cfg
@@ -82,8 +83,7 @@ target/
 .ipynb_checkpoints
 
 #docker
-docker/server
 docker/ntg_common
 docker/client
 docker/scripts
-docker/backup
+docker/server

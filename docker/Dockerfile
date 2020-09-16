@@ -7,6 +7,9 @@ RUN	apt-get update && \
 
 COPY server/requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# workaround: pip won't install those packages
+RUN pip install email_validator
+RUN pip install login
 
 RUN useradd --create-home ntg
 WORKDIR /home/ntg
