@@ -2,9 +2,10 @@
 
 build: Makefile
 	# build vue.js app via npm and make
-	rm -rf ../client/build
-	cd ../client && npm install
-	cd ../client && $(MAKE)
+	# TODO currently not working on all machines due to babel/webpack/vue :(
+	# rm -rf ../client/build
+	# cd ../client && npm install
+	# cd ../client && $(MAKE)
 	# copy all source folders to this folder to build docker image
 	rm -rf server ntg_common
 	cp -a ../server ../ntg_common .
