@@ -37,6 +37,6 @@ builds:
     - docker info
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -f Dockerfile.db --tag=intf/ntg-db-server  .
-	- docker build -f Dockerfile    --tag=intf/ntg-app-server .
+    - docker build -f Dockerfile    --tag=intf/ntg-app-server .
     - docker push intf/ntg-db-server
     - docker push intf/ntg-app-server
