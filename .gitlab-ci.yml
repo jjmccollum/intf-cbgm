@@ -1,4 +1,11 @@
 image: ubuntu:latest
+before_script:
+  - apt-get update
+  - apt-get install -y npm curl
+  - curl -sL https://deb.nodesource.com/setup_current.x | -E bash -
+  - apt-get install -y nodejs
+  - npm -v
+  - node -v
 
 stages:
   - build
@@ -23,9 +30,6 @@ builds:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
     CI_PROJECT_PATH: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
-
-  before_script:
-    - apt-get update && apt-get install -y node npm
 
   script:
     - cd $FOLDER/docker
