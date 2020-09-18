@@ -1,0 +1,42 @@
+image: ubuntu:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  FOLDER: ./
+
+builds:
+  image: docker:19.03
+
+  stage: build
+
+  services:
+    - docker:dind
+
+  tags:
+    - docker-in-docker
+
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    CI_PROJECT_PATH: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+
+  before_script:
+    - apt-get update && apt-get install -y node npm
+
+  script:
+    - cd $FOLDER/docker
+    - make run
+    - export DOCKERTAGNAME=$(echo "$CI_JOB_NAME" | cut -d":" -f2)
+    - export CI_PROJECT_PATH=$CI_PROJECT_PATH/$DOCKERTAGNAME
+    - export CI_IMAGE_LATEST=$CI_PROJECT_PATH:latest
+    - export CI_IMAGE_SHA=$CI_PROJECT_PATH:$CI_COMMIT_BRANCH
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f Dockerfile.db --tag=intf/ntg-db-server  .
+	- docker build -f Dockerfile    --tag=intf/ntg-app-server .
+    - docker push intf/ntg-db-server
+    - docker push intf/ntg-app-server
