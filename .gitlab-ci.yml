@@ -1,4 +1,4 @@
-image: ubuntu:latest
+image: npm:latest
 
 stages:
   - build
@@ -32,7 +32,15 @@ builds:
     # - npm -v
     # - node -v
     - cd $FOLDER/docker
-    - make run
+    - rm -rf ../client/build
+    - cd ../client && npm install
+    - cd ../client && $(MAKE)
+    - mkdir client
+    - mkdir scripts
+    - rm -rf server ntg_common
+    - cp -a ../server ../ntg_common .
+    - cp -a ../client/build/* ./client
+    - cp -a ../scripts/cceh/* ./scripts
     - export DOCKERTAGNAME=$(echo "$CI_JOB_NAME" | cut -d":" -f2)
     - export CI_PROJECT_PATH=$CI_PROJECT_PATH/$DOCKERTAGNAME
     - export CI_IMAGE_LATEST=$CI_PROJECT_PATH:latest
