@@ -7,6 +7,8 @@ build: Makefile
 	cd ../client && npm install
 	cd ../client && $(MAKE)
 	# copy all source folders to this folder to build docker image
+	mkdir client
+	mkdir scripts
 	rm -rf server ntg_common
 	cp -a ../server ../ntg_common .
 	cp -a ../client/build/* ./client
