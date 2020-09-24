@@ -51,6 +51,6 @@ builds:
     - docker pull $CI_COMMIT_BRANCH || true
     - echo $CI_IMAGE_SHA
     - echo $CI_IMAGE_LATEST
-    - docker build --cache-from $CI_IMAGE_LATEST --tag zivgitlab.wwu.io/scdh/intf/ntg/builds:latest .
+    - docker build --cache-from zivgitlab.wwu.io/scdh/intf/ntg/builds:latest --tag zivgitlab.wwu.io/scdh/intf/ntg/builds:latest --tag zivgitlab.wwu.io/scdh/intf/ntg/builds:master .
     - docker push $CI_IMAGE_SHA
     - docker push $CI_IMAGE_LATEST
