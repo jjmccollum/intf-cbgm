@@ -49,8 +49,8 @@ builds:
     - docker info
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker pull $CI_COMMIT_BRANCH || true
-    - docker build --cache-from $CI_IMAGE_LATEST --tag $CI_IMAGE_LATEST --tag $CI_IMAGE_SHA .
     - echo $CI_IMAGE_SHA
     - echo $CI_IMAGE_LATEST
+    - docker build --cache-from $CI_IMAGE_LATEST --tag zivgitlab.wwu.io/scdh/intf/ntg/builds:latest .
     - docker push $CI_IMAGE_SHA
     - docker push $CI_IMAGE_LATEST
