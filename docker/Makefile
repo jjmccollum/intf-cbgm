@@ -2,20 +2,21 @@
 
 build: Makefile
 	# build vue.js app via npm and make
-	# FIXME currently not working on all machines due to babel/webpack/vue :(
+	# currently working with node v14.15.0 with npm v6.14.8 
+	# make sure to use correct package.json
 	rm -rf ../client/build
 	cd ../client && npm install
 	cd ../client && $(MAKE)
 	# copy all source folders to this folder to build docker image
+	rm -rf client scripts server ntg_common
 	mkdir client
-	mkdir scripts
-	rm -rf server ntg_common
+	mkdir scripts	
 	cp -a ../server ../ntg_common .
 	cp -a ../client/build/* ./client
 	cp -a ../scripts/cceh/* ./scripts
 	# we need two dockerfiles, one for the db and one for the server
-	# docker build -f Dockerfile.db --tag=intf/ntg-db-server  .
-	# docker build -f Dockerfile    --tag=intf/ntg-app-server .
+	docker build -f Dockerfile.db --tag=intf/ntg-db-server  .
+	docker build -f Dockerfile    --tag=intf/ntg-app-server .
 
 # this command only works on a production server with a fully functional database
 backup:

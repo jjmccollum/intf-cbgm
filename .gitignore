@@ -17,6 +17,7 @@ sphinxjs
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode
 
 # C extensions
 *.so
@@ -40,6 +41,7 @@ var/
 .installed.cfg
 *.egg
 package-lock.json
+*.eot
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
