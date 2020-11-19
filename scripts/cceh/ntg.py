@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import fileinput
+import time
 
 """
 This file is part of the CBGM Project @ INTF - WWU Münster
@@ -29,6 +30,7 @@ project_data = {
     "phase": "",
     "shortcut": ""
 }
+
 global bcolors
 bcolors = {
     "HEADER":'\033[95m',
@@ -53,7 +55,8 @@ def new_project(project_data):
     """
     starts a new project
     """
-    print('Starting a new project.')
+    print('Starting a New Project.')
+    # TODO new project has no set_write_access() and no save_and_load_edits()
 
 
 def new_phase(project_data):
@@ -61,15 +64,22 @@ def new_phase(project_data):
     starts a new phase with apparatus update (default)
     currently, there is no new phase WITHOUT apparatus update
     """
-    print('Starting a new phase.')
+    print('Starting a New Phase with Apparatus Update.')
     get_inputs(project_data)
     write_db_config(project_data)
-    user_input = 'n'
-    user_input = input(
-        f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
-    if (user_input == 'y'):
-        set_write_access(project_data)
+    create_new_psql_db(project_data)
+    # user_input = 'n'
+    # user_input = input(
+    #     f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
+    # if (user_input == 'y'):
+    #     set_write_access(project_data)
+    create_new_mysql_db(project_data)
+    make_mysql_dumps(project_data)
+    run_prepare_scripts(project_data)
+    save_and_load_edits(project_data)
+    run_cbgm_script(project_data)
     activate_db(project_data)
+    cleaning_up()
     return project_data
 
 
@@ -134,11 +144,15 @@ def set_write_access(project_data):
     try:
         config_file = project_data['preceding_config']
         wa_string = 'WRITE_ACCESS="editor_' + project_data['preceding_book_l'] + '"'
-        for line in fileinput.input([config_file], inplace=True):
+        # FIXME do not hardcode path to config files
+        for line in fileinput.input(["/home/ntg/prj/ntg/ntg/instance/" + config_file], inplace=True):
             print(line.replace(wa_string,'WRITE_ACCESS="nobody"'),end='')
     except Exception as e:
         print(f'{bcolors["ERROR"]}ERROR: While trying to set write access. Does {config_file} exists?{bcolors["ENDC"]}')
         print(e)
+
+    print('Restarting Server.')
+    os.system('/bin/systemctl restart ntg')
     return None
 
 
@@ -175,9 +189,15 @@ def write_db_config(project_data):
     MYSQL_NESTLE_TABLE="Nestle29"
     """
 
-    with open(project_data['config_file'], "w") as w:
+    print('Writing db config file.')
+    pf = project_data['config_file']
+    
+    # FIXME do not hardcode path to config files
+    with open('/home/ntg/prj/ntg/ntg/instance/' + project_data['config_file'], "w") as w:
         w.write(configuration.format(project_data['book'], project_data['phase'],
                                      project_data['book_l'], project_data['version'], project_data['shortcut']))
+
+    print('Done.')
 
 
 def activate_db(project_data):
@@ -207,8 +227,81 @@ def activate_db(project_data):
         print(f'{bcolors["ERROR"]}ERROR: While writing to active_databases.{bcolors["ENDC"]}')
         print(e)
 
+def create_new_psql_db(project_data):
+    psql_db = project_data['book_and_phase']
+    print(f'Dropping Postgres Database with name {psql_db}.')
+    # terminate for active users (not possible with formatted strings)
+    query = "sudo -u postgres psql" + ' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = ' + "'" + psql_db + "'" + ' AND pid <> pg_backend_pid();"'
+    os.system(query)
+    os.system(f'sudo -u postgres psql -c "DROP DATABASE {psql_db}";')
 
-# main entry point for this script
+    print(f'Creating Postgres Database with name {psql_db}.')
+    os.system(f'sudo -u postgres /home/ntg/prj/ntg/ntg/scripts/cceh/create_database.sh {psql_db}')
+    return None
+
+def make_mysql_dumps(project_data):
+    psql_db = project_data['book_and_phase']
+    print('Dumping Nestle from remote.')
+    os.system('sudo -u ntg rm /backup/dumps/Nestle29.dump')
+    os.system('sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/Nestle29.dump Apparat Nestle29')
+    print('Done dumping.')
+    print('Dumping Apparat from remote. This may take a while...')
+    os.system(f'sudo -u ntg rm /backup/dumps/{psql_db}')
+    os.system(f'sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/{psql_db} Apparat_annette')
+    print('Done dumping.')
+    return None
+
+def create_new_mysql_db(project_data):
+    mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
+    psql_db = project_data['book_and_phase']
+    print('Dropping old mysql database.')
+    os.system(f'sudo -u ntg mysql -e "DROP DATABASE {mysql_db}"')
+    os.system('sudo -u ntg mysql -e "DROP DATABASE Nestle29"')
+
+    print(f'Creating new mysql database with name "{mysql_db}".')
+    os.system(f'sudo -u ntg mysql -e "CREATE DATABASE {mysql_db}"')
+    os.system('sudo -u ntg mysql -e "CREATE DATABASE Nestle29"')
+    os.system(f'sudo -u ntg cat /backup/dumps/{psql_db}  | mysql -D {mysql_db}')
+    os.system('sudo -u ntg cat /backup/dumps/Nestle29.dump | mysql -D Nestle29')
+    return None
+
+def run_prepare_scripts(project_data):
+    cf = project_data['config_file']
+    print('Running Import Script.')
+    os.system(f'sudo -u ntg python3 -m import  -vvv instance/{cf}')
+    print('Running Prepare Script.')
+    os.system(f'sudo -u ntg python3 -m prepare -vvv instance/{cf}')
+    return None
+
+def save_and_load_edits(project_data):
+    cf = project_data['config_file']
+    pcf = project_data['preceding_config']
+    print('Saving Edits.')
+    os.system(f'sudo -u ntg python3 -m scripts.cceh.save_edits -vvv -o saved_edits.xml instance/{pcf}')
+    print('Loading Edits.')
+    os.system(f'sudo -u ntg python3 -m scripts.cceh.load_edits -vvv -i saved_edits.xml instance/{cf}')
+    return None
+
+
+def run_cbgm_script(project_data):
+    cf = project_data['config_file']
+    print('Running CBGM Script.')
+    os.system(f'sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
+    print('Restarting Server.')
+    os.system('sudo -u ntg /bin/systemctl restart ntg')
+    return None
+
+def cleaning_up():
+    print('Cleaning up.')
+    os.system('sudo -u ntg mysql -e "DROP DATABASE ECM_Mark_Ph3"')
+    os.system('sudo -u ntg mysql -e "DROP DATABsASE Nestle29"')
+    return None
+
+# ===========
+# ENTRY POINT
+# ===========
+
+# note: run this script via "sudo" to get all systemrights
 print(ascii_art)
 choice = input(
     f'PLEASE SELECT:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
@@ -217,6 +310,3 @@ if choice == '1':
     new_project(project_data)
 else:
     new_phase(project_data)
-
-# os.system('ls -l')
-# os.system('python -m script')
