@@ -73,13 +73,16 @@ def new_phase(project_data):
     #     f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
     # if (user_input == 'y'):
     #     set_write_access(project_data)
-    create_new_mysql_db(project_data)
     make_mysql_dumps(project_data)
-    run_prepare_scripts(project_data)
-    save_and_load_edits(project_data)
-    run_cbgm_script(project_data)
-    activate_db(project_data)
-    cleaning_up()
+    create_new_mysql_db(project_data)
+    # run_prepare_scripts(project_data)
+    # FIXME WARNING!! DO NOT RUN without checking save_edits.xml first
+    # FIXME WARNING!! DO NOT RUN without checking save_edits.xml first
+    # FIXME WARNING!! DO NOT RUN without checking save_edits.xml first
+    # save_and_load_edits(project_data)
+    # run_cbgm_script(project_data)
+    # activate_db(project_data)
+    # cleaning_up(project_data)
     return project_data
 
 
@@ -233,7 +236,7 @@ def create_new_psql_db(project_data):
     # terminate for active users (not possible with formatted strings)
     query = "sudo -u postgres psql" + ' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = ' + "'" + psql_db + "'" + ' AND pid <> pg_backend_pid();"'
     os.system(query)
-    os.system(f'sudo -u postgres psql -c "DROP DATABASE {psql_db}";')
+    os.system(f'sudo -u postgres psql -c "DROP DATABASE IF EXISTS {psql_db};"')
 
     print(f'Creating Postgres Database with name {psql_db}.')
     os.system(f'sudo -u postgres /home/ntg/prj/ntg/ntg/scripts/cceh/create_database.sh {psql_db}')
@@ -242,11 +245,11 @@ def create_new_psql_db(project_data):
 def make_mysql_dumps(project_data):
     psql_db = project_data['book_and_phase']
     print('Dumping Nestle from remote.')
-    os.system('sudo -u ntg rm /backup/dumps/Nestle29.dump')
+    os.system('rm /backup/dumps/Nestle29.dump')
     os.system('sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/Nestle29.dump Apparat Nestle29')
     print('Done dumping.')
     print('Dumping Apparat from remote. This may take a while...')
-    os.system(f'sudo -u ntg rm /backup/dumps/{psql_db}')
+    os.system(f'rm /backup/dumps/{psql_db}')
     os.system(f'sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/{psql_db} Apparat_annette')
     print('Done dumping.')
     return None
@@ -255,46 +258,49 @@ def create_new_mysql_db(project_data):
     mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
     psql_db = project_data['book_and_phase']
     print('Dropping old mysql database.')
-    os.system(f'sudo -u ntg mysql -e "DROP DATABASE {mysql_db}"')
-    os.system('sudo -u ntg mysql -e "DROP DATABASE Nestle29"')
+    os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
+    os.system('mysql -e "DROP DATABASE IF EXISTS Nestle29;"')
 
     print(f'Creating new mysql database with name "{mysql_db}".')
-    os.system(f'sudo -u ntg mysql -e "CREATE DATABASE {mysql_db}"')
-    os.system('sudo -u ntg mysql -e "CREATE DATABASE Nestle29"')
-    os.system(f'sudo -u ntg cat /backup/dumps/{psql_db}  | mysql -D {mysql_db}')
-    os.system('sudo -u ntg cat /backup/dumps/Nestle29.dump | mysql -D Nestle29')
+    os.system(f'mysql -e "CREATE DATABASE {mysql_db}"')
+    os.system('mysql -e "CREATE DATABASE Nestle29"')
+    print("Generating Nestle29 mySQL Database.")
+    os.system('cat /backup/dumps/Nestle29.dump | mysql -D Nestle29')
+    print(f'Generating {psql_db} mySQL Database. This may take a while...')
+    os.system(f'cat /backup/dumps/{psql_db} | mysql -D {mysql_db}')
     return None
 
 def run_prepare_scripts(project_data):
     cf = project_data['config_file']
     print('Running Import Script.')
-    os.system(f'sudo -u ntg python3 -m import  -vvv instance/{cf}')
+    os.system(f'python3 -m import  -vvv instance/{cf}')
     print('Running Prepare Script.')
-    os.system(f'sudo -u ntg python3 -m prepare -vvv instance/{cf}')
+    os.system(f'python3 -m prepare -vvv instance/{cf}')
     return None
 
 def save_and_load_edits(project_data):
     cf = project_data['config_file']
     pcf = project_data['preceding_config']
     print('Saving Edits.')
-    os.system(f'sudo -u ntg python3 -m scripts.cceh.save_edits -vvv -o saved_edits.xml instance/{pcf}')
+    os.system(f'python3 -m scripts.cceh.save_edits -vvv -o saved_edits.xml instance/{pcf}')
     print('Loading Edits.')
-    os.system(f'sudo -u ntg python3 -m scripts.cceh.load_edits -vvv -i saved_edits.xml instance/{cf}')
+    os.system(f'python3 -m scripts.cceh.load_edits -vvv -i saved_edits.xml instance/{cf}')
     return None
 
 
 def run_cbgm_script(project_data):
     cf = project_data['config_file']
     print('Running CBGM Script.')
-    os.system(f'sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
+    os.system(f'python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
     print('Restarting Server.')
-    os.system('sudo -u ntg /bin/systemctl restart ntg')
+    os.system('/bin/systemctl restart ntg')
     return None
 
-def cleaning_up():
+def cleaning_up(project_data):
+    mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
     print('Cleaning up.')
-    os.system('sudo -u ntg mysql -e "DROP DATABASE ECM_Mark_Ph3"')
-    os.system('sudo -u ntg mysql -e "DROP DATABsASE Nestle29"')
+    os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
+    os.system('mysql -e "DROP DATABsASE IF EXISTS Nestle29"')
     return None
 
 # ===========
