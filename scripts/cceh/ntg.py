@@ -67,7 +67,13 @@ def new_phase(project_data):
     currently, there is no new phase WITHOUT apparatus update
     """
     print('Starting a New Phase with Apparatus Update.')
+    # FIXME hardcoded, read config file names?
+    BLOCKLIST = ['mark_ph3', 'mark_ph31', 'mark_ph32', 'acts_ph4', 'acts_ph5']
     get_inputs(project_data)
+    if (project_data['book_and_phase'] in BLOCKLIST):
+        print(
+            f'{bcolors["ERROR"]}It is not allowed to overwrite existing phases!{bcolors["ENDC"]}')
+        return None
     write_db_config(project_data)
     create_new_psql_db(project_data)
     user_input = 'n'
