@@ -74,7 +74,9 @@ def new_phase(project_data):
         print(
             f'{bcolors["ERROR"]}It is not allowed to overwrite existing phases!{bcolors["ENDC"]}')
         return None
+    print('Step 1 of 9: Writing config file...')
     write_db_config(project_data)
+    print('Step 2 of 9: Creating new Postgres Database...')
     create_new_psql_db(project_data)
     user_input = 'n'
     project_data = calc_preceding_phase(project_data)
@@ -82,13 +84,21 @@ def new_phase(project_data):
         f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
     if (user_input == 'y'):
         set_write_access(project_data)
+    print('Step 3 of 9: Dumping mySQL Tables...')
     make_mysql_dumps(project_data)
+    print('Step 4 of 9: Creating mySQL Tables...')
     create_new_mysql_db(project_data)
+    print('Step 5 of 9: Running import and prepare scripts...')
     run_prepare_scripts(project_data)
+    print('Step 6 of 9: Loading saved edits...')
     save_and_load_edits(project_data)
+    print('Step 7 of 9: Running CBGM script...')
     run_cbgm_script(project_data)
+    print('Step 8 of 9: Adding db to active databases...')
     activate_db(project_data)
+    print('Step 9 of 9: Cleaning up...')
     cleaning_up(project_data)
+    print('Done.')
     return project_data
 
 
@@ -343,7 +353,6 @@ def run_cbgm_script(project_data):
 
 def cleaning_up(project_data):
     mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
-    print('Cleaning up.')
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
     os.system('mysql -e "DROP DATABASE IF EXISTS Nestle29;"')
     return None
