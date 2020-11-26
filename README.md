@@ -10,9 +10,9 @@
 
 "Genealogical Queries" is a collection of tools to apply the CBGM. It consists of a Vue-based interface, a Flask-based backend, a postgres database, many Python scripts and other 3rd party tools and libraries.
 
-- What is the Coherence-Based Genealogical Method?](https://www.uni-muenster.de/INTF/Genealogical_method.html)
-- How does the Genealogical Queries Tool work?](https://ntg.uni-muenster.de/pdfs/GenQ4_Guide.pdf)
-- Where is the CBGM used?](https://en.wikipedia.org/wiki/Editio_Critica_Maior)
+- [What is the Coherence-Based Genealogical Method?](https://www.uni-muenster.de/INTF/Genealogical_method.html)
+- [How does the Genealogical Queries Tool work?](https://ntg.uni-muenster.de/pdfs/GenQ4_Guide.pdf)
+- [Where is the CBGM used?](https://en.wikipedia.org/wiki/Editio_Critica_Maior)
 
 ## Other links
 
@@ -27,7 +27,7 @@ But it is much easier to start via Docker.
 
 # Installation with Docker
 
-**Current data model**: Acts Phase 4 / Acts of the Apostles (4th phase)
+**Current data model**: Acts of the Apostles Phase 4
 
 ## Instructions Docker
 
