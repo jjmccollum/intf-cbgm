@@ -66,7 +66,7 @@ Links
 
 The application is online at: http://ntg.uni-muenster.de/acts/ph4/
 
-The source code is online at: https://github.com/cceh/ntg
+The source code is online at: https://github.com/scdh/intf-cbgm/
 
 An introductory presentation to the CBGM: https://www.uni-muenster.de/INTF/cbgm_presentation/download.html
 
