@@ -6,7 +6,7 @@
 
 Dies ist eine kurzgehaltene Einführung für Software-Entwickler, um die
 Grundlagen zu vermitteln, die zum Verstehen des Verfahrens notwendig sind.  Sie
-entspricht nicht dem neuesten Stand der Forschung.
+entspricht nicht dem neuesten Stand der Forschung. 
 
 
 Das Neue Testament
