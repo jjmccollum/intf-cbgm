@@ -6,7 +6,7 @@
 
 Dies ist eine kurzgehaltene Einführung für Software-Entwickler, um die
 Grundlagen zu vermitteln, die zum Verstehen des Verfahrens notwendig sind.  Sie
-entspricht nicht dem neuesten Stand der Forschung.
+entspricht nicht dem neuesten Stand der Forschung. 
 
 
 Das Neue Testament
@@ -50,7 +50,7 @@ Novum Testamentum Graece, 28. Auflage, 2012, (NA28) (Editio minor)
 Handausgabe, etwa 900 Seiten, ab 28€
 
 Die MySQL-Datenbank, die dieser Ausgabe zugrunde liegt, ist der
-Startpiunkt der CBGM.
+Startpunkt der CBGM.
 
 
 Editio Critica Maior
