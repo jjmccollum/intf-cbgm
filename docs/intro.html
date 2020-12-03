@@ -126,14 +126,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Manual</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="domain.html">Introduction to the Problem Domain (German)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#das-neue-testament">Das Neue Testament</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#editionen">Editionen</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#die-textzeugen">Die Textzeugen</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#textformen-texttypen">Textformen (Texttypen)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#textkritik">Textkritik</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#terminologie">Terminologie</a></li>
-<li class="toctree-l3"><a class="reference internal" href="domain.html#literatur">Literatur</a></li>
+<ul>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="client_dev.html">Web Client</a><ul>
@@ -311,7 +304,10 @@ will contain prior variants, and this fact is taken into account
 systematically.</p>
 <p>The CBGM was developed in the context of the <em>Editio Critica Maior – Novum
 Testamentum Graecum</em> (ECM).</p>
+<div class="pic pic-format-text-xml pic-language-uml">
 <img src="_images/ECM01.jpg" alt="Fig. 1: ECM of the Acts of the Apostles" style="display: block; margin-left: auto; margin-right: auto;" />
+<p class="caption" style="text-align: center;">Fig. 1: ECM of the Acts of the Apostles</p>
+<div>
 <p>The application requires a comprehensive, well-structured critical apparatus
 meeting the ECM standard. For each of the manuscripts included there is one
 entry at each variant passage. The apparatus of Acts, for example, contains
@@ -326,7 +322,11 @@ text as preserved in the manuscripts has to rest upon the genealogical
 relationships between the variants they exhibit. Therefore a systematic
 assessment of the genealogy of these variants (displayed as local stemmata)
 is a necessary requirement for examining the genealogy of textual witnesses.</strong></p>
-<img src="_images/LocStem01.jpg" alt="Fig. 2: A local stemma of variants"/>
+<div class="pic pic-format-text-xml pic-language-uml">
+  <img src="_images/LocStem01.jpg" alt="Fig. 2: A local stemma of variants"/>  
+  <p class="caption">Fig. 2: A local stemma of variants</p>
+  <div>
+
 <p>The relationship between two witnesses as compared at one variant passage
 can take four forms.
 1) They are equal (01 and 02 in fig. 2).
@@ -344,7 +344,14 @@ Y has the prior variant. Finally there will be a number of unclear cases
 where the variants of X and Y are not directly related or it has to be
 left open which is the prior one. These numbers are tabulated in lists
 of relatives for each of the witnesses included in the apparatus.</p>
-<img src="_images/Relatives01.jpg" alt="Fig. 3: Relatives list of witness 01 in Acts (Phase 4)"/>
+
+<div class="pic pic-format-text-xml pic-language-uml">
+  <img src="_images/Relatives01.jpg" alt="Fig. 3: Relatives list of witness 01 in Acts (Phase 4)"/>
+  <p class="caption">Fig. 3: Relatives list of witness 01 in Acts (Phase 4)</p>
+  <div>
+
+
+
 <p>The structure of the relatives list is explained by the <em>Short Guide</em> on
 the website &lt;<a class="reference external" href="https://ntg.uni-muenster.de/acts/ph4/">https://ntg.uni-muenster.de/acts/ph4/</a>&gt;. Here we focus on what
 is essential for this brief introduction.
@@ -378,7 +385,12 @@ a variant by the user[1]_.  The potential ancestors within the connectivity
 range are either part of the same attestation or they support another variant.
 In our example all the potential ancestors outside the attestation of c
 support a. This is a strong argument for assessing <em>a</em> as prior to <em>c</em>.</p>
-<img src="_images/Coherence01.jpg " alt="Fig. 4: Textual flow diagram for Acts 3:13/8c with default parameters"/>
+
+<div class="pic pic-format-text-xml pic-language-uml">
+  <img src="_images/Coherence01.jpg " alt="Fig. 4: Textual flow diagram for Acts 3:13/8c with default parameters"/>
+  <p class="caption">Fig. 4: Textual flow diagram for Acts 3:13/8c with default parameters</p>
+  <div>
+
 <p>The term <em>potential ancestor</em> was coined in view of the final procedure
 of the CBGM, the construction of the <em>global stemma</em>. A global stemma will
 be composed of <em>optimal substemmata</em> for which only stemmatic ancestors
@@ -403,7 +415,7 @@ to an optimal substemma. An optimal result would only be yielded by a method
 that includes all combinations of all potential ancestors. In the near
 future we hope to be able to find help with developing OS software for
 utilizing a HPC cluster.</p>
-<p>References</p>
+<h2>References</h2>
 <p>Novum Testamentum Graecum – Editio Critica Maior, ed. by the Institute for
 New Testament Textual Research, Münster.</p>
 <p>Vol. III Acts of the Apostles, ed. Holger Strutwolf, Georg Gäbel,
