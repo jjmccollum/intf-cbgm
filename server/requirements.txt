@@ -11,4 +11,3 @@ psycopg2-binary
 sqlalchemy
 sqlalchemy-utils
 email_validator
-login
