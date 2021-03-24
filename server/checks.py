@@ -20,16 +20,16 @@ from ntg_common import tools
 from helpers import Passage, Manuscript, make_json_response, csvify
 
 
-bp = flask.Blueprint ('checks', __name__)
+bp = flask.Blueprint('checks', __name__)
 
 
-def init_app (app):
+def init_app(app):
     """ Init the Flask app. """
 
     pass
 
 
-def congruence (conn, passage):
+def congruence(conn, passage):
     """Check the congruence.
 
     "Das Prüfprogramm soll eine Inkongruenz anzeigen, wenn der Zeuge einer Lesart
@@ -49,7 +49,7 @@ def congruence (conn, passage):
 
     """
 
-    res = execute (conn, """
+    res = execute(conn, """
     -- get the closest ancestors ms1 for every manuscript ms2
     WITH ranks AS (
       SELECT
@@ -107,22 +107,23 @@ def congruence (conn, passage):
             AND rr.rank <= 1
         )
     ORDER BY hs2, rank
-    """, dict (
-        rg_id   = passage.range_id ('All'),
-        pass_id = passage.pass_id,
-        connectivity = 5,
-        exclude = (2,),
+    """, dict(
+        rg_id=passage.range_id('All'),
+        pass_id=passage.pass_id,
+        connectivity=5,
+        exclude=(2,),
     ))
 
-    Ranks = collections.namedtuple ('Ranks', 'ms1 ms2 ms_id1 ms_id2 labez1 labez2 rank')
-    ranks = list (map (Ranks._make, res))
+    Ranks = collections.namedtuple(
+        'Ranks', 'ms1 ms2 ms_id1 ms_id2 labez1 labez2 rank')
+    ranks = list(map(Ranks._make, res))
 
-    tools.log (logging.INFO, 'rg_id: ' + str (passage.range_id ('All')))
+    tools.log(logging.INFO, 'rg_id: ' + str(passage.range_id('All')))
 
     return ranks
 
 
-def congruence_list (conn, passage, range_id):
+def congruence_list(conn, passage, range_id):
     """Check the congruence.
 
     "Das Prüfprogramm soll eine Inkongruenz anzeigen, wenn der Zeuge einer Lesart
@@ -140,9 +141,12 @@ def congruence_list (conn, passage, range_id):
 
     Wenn Lesart x im lokalen Stemma von ? abhängt, ist keine Aussage möglich.
 
+    Weitere Regel:
+    Wo A definiert ist, soll A wie jeder andere pV in die Kongruenzprüfung einbezogen werden.
+    -- email K. Wachtel 05.02.2021
     """
 
-    res = execute (conn, """
+    res = execute(conn, """
     -- get the closest ancestors ms1 for every manuscript ms2
     WITH ranked AS (
       SELECT
@@ -224,36 +228,37 @@ def congruence_list (conn, passage, range_id):
         )
 
     ORDER BY pass_id, ms1.hsnr
-    """, dict (
-        rg_id = passage.range_id ('All'),
-        range_id = range_id,
-        connectivity = 5,
-        exclude = (1,2),
+    """, dict(
+        rg_id=passage.range_id('All'),
+        range_id=range_id,
+        connectivity=5,
+        exclude=(2,),
     ))
 
-    Ranks = collections.namedtuple ('Ranks', 'pass_id begadr endadr ms1 ms2 ms_id1 ms_id2 labez1 labez2 rank')
+    Ranks = collections.namedtuple(
+        'Ranks', 'pass_id begadr endadr ms1 ms2 ms_id1 ms_id2 labez1 labez2 rank')
     ranks = []
     for r in res:
-        rank = Ranks._make (r)._asdict ()
-        rank['hr'] = Passage.static_to_hr (rank['begadr'], rank['endadr'])
-        ranks.append (rank)
+        rank = Ranks._make(r)._asdict()
+        rank['hr'] = Passage.static_to_hr(rank['begadr'], rank['endadr'])
+        ranks.append(rank)
 
     return ranks
 
 
-@bp.route ('/checks/congruence.json/<passage_or_id>')
-def congruence_json (passage_or_id):
+@bp.route('/checks/congruence.json/<passage_or_id>')
+def congruence_json(passage_or_id):
     """ Endpoint: check the congruence """
 
-    with current_app.config.dba.engine.begin () as conn:
-        passage = Passage (conn, passage_or_id)
-        return make_json_response (congruence (conn, passage))
+    with current_app.config.dba.engine.begin() as conn:
+        passage = Passage(conn, passage_or_id)
+        return make_json_response(congruence(conn, passage))
 
 
-@bp.route ('/checks/congruence_list.json/<range_id>')
-def congruence_list_json (range_id):
+@bp.route('/checks/congruence_list.json/<range_id>')
+def congruence_list_json(range_id):
     """ Endpoint: check the congruence """
 
-    with current_app.config.dba.engine.begin () as conn:
-        passage = Passage (conn, 1)
-        return make_json_response (congruence_list (conn, passage, range_id))
+    with current_app.config.dba.engine.begin() as conn:
+        passage = Passage(conn, 1)
+        return make_json_response(congruence_list(conn, passage, range_id))
