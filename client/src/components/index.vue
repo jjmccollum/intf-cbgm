@@ -57,7 +57,7 @@
 
 <script>
 /* import these images for the side-effect only: make webpack pack these files. */
-import intf_logo from "../images/intf-logo.png";
+import intf_logo from "../images/intf2021.jpeg";
 import awk_logo from "../images/awk-logo-00.png";
 import cceh_logo from "../images/cceh-logo.png";
 import scdh_logo from "../images/scdh-logo.jpg";
