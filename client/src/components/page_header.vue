@@ -5,13 +5,14 @@
       <!-- needs a nested container to expand the violet band to the screen edges -->
       <h1 class="container d-flex flex-row justify-content-between">
         <span class="caption">{{ route_meta.caption }}</span>
-        <span class="appname">{{ route_meta.caption === 'Genealogical Queries' ? '' : current_application.name }}</span>
+        <span class="appname">{{ route_meta.caption === 'Genealogical Queries' ? 'Projects' : current_application.name }}</span>
       </h1>
     </div>
 
     <div
       class="login-nav container d-flex flex-row justify-content-end bs-docs-container"
     >
+    <div v-if="route_meta.caption != 'Genealogical Queries'">
       <router-link :to="{ name: route_meta.projects.route }">{{
         route_meta.projects.caption
       }}</router-link>
@@ -20,6 +21,7 @@
         route_meta.home.caption
       }}</router-link>
       &#xa0; | &#xa0;
+      </div>
       <a href="/pdfs/GenQ4_Guide.pdf" target="_blank">Short Guide (PDF)</a>
       <template v-if="current_user.can_login">
         <template v-if="is_logged_in">
