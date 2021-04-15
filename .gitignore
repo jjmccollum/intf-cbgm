@@ -76,6 +76,11 @@ docs/.buildinfo
 *.aux
 *.log
 *.out
+sphinxcontrib/
+
+#Ignore docs temporarily
+docs/
+docs_org/
 
 # PyBuilder
 target/
