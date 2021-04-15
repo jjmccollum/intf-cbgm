@@ -22,6 +22,21 @@ ascii_art = """
 ██║     ██╔══██╗██║   ██║██║╚██╔╝██║
 ╚██████╗██████╔╝╚██████╔╝██║ ╚═╝ ██║
  ╚═════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝
+
+  === SETUP WIZARD ===
+  
+      |\          .(' *) ' .
+     | \        ' .*) .'*
+     |(*\      .*(// .*) .
+     |___\       // (. '*
+     ((("'\     // '  * .
+     ((c'7')   /\)
+     ((((^))  /  \
+   .-')))(((-'   /
+      (((()) __/'
+ jgs   )))( |
+        (()
+         ))
 """
 
 # variables
@@ -284,6 +299,7 @@ def create_new_psql_db(project_data):
 def make_mysql_dumps(project_data):
     psql_db = project_data['book_and_phase']
     print('Dumping Nestle from remote.')
+    # FIXME this should be made configurable
     os.system('rm /backup/dumps/Nestle29.dump')
     os.system(
         'sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/Nestle29.dump Apparat Nestle29')
