@@ -661,7 +661,7 @@ class Readings (Base2):
     __tablename__ = 'readings'
 
     pass_id   = Column (Integer,       nullable = False)
-    labez     = Column (String (3),    nullable = False)
+    labez     = Column (String (64),    nullable = False)
 
     lesart    = Column (String (1024))
 
@@ -757,13 +757,13 @@ class Apparatus (Base2):
 
     ms_id     = Column (Integer,       nullable = False, index = True)
     pass_id   = Column (Integer,       nullable = False)
-    labez     = Column (String (3),    nullable = False)
+    labez     = Column (String (64),    nullable = False)
 
     cbgm      = Column (Boolean,       nullable = False)
     labezsuf  = Column (String (64),   nullable = False, server_default = '')
     certainty = Column (Float (16),    nullable = False, server_default = '1.0')
     lesart    = Column (String (1024), nullable = True,  server_default = None)
-    origin    = Column (String (3),    nullable = False)
+    origin    = Column (String (64),    nullable = False)
 
     __table_args__ = (
         PrimaryKeyConstraint (pass_id, ms_id, labez),
@@ -792,7 +792,7 @@ class TTS_Mixin (object):
 
 class Cliques_Mixin (TTS_Mixin):
     pass_id   = Column (Integer,    nullable = False)
-    labez     = Column (String (3), nullable = False)
+    labez     = Column (String (64), nullable = False)
     clique    = Column (String (2), nullable = False, server_default = '1')
 
 
@@ -859,7 +859,7 @@ class Cliques_TTS (Cliques_Mixin, Base2):
 class MsCliques_Mixin (TTS_Mixin):
     ms_id         = Column (Integer,    nullable = False, index = True)
     pass_id       = Column (Integer,    nullable = False)
-    labez         = Column (String (3), nullable = False)
+    labez         = Column (String (64), nullable = False)
     clique        = Column (String (2), nullable = False, server_default = '1')
 
 
@@ -931,9 +931,9 @@ class MsCliques_TTS (MsCliques_Mixin, Base2):
 
 class LocStem_Mixin (TTS_Mixin):
     pass_id       = Column (Integer,    nullable = False)
-    labez         = Column (String (3), nullable = False)
+    labez         = Column (String (64), nullable = False)
     clique        = Column (String (2), nullable = False, server_default = '1')
-    source_labez  = Column (String (3), nullable = False)
+    source_labez  = Column (String (64), nullable = False)
     source_clique = Column (String (2), nullable = False, server_default = '1')
 
 
