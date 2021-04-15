@@ -89,7 +89,11 @@ target/
 .ipynb_checkpoints
 
 #docker
+docker/server
 docker/ntg_common
 docker/client
 docker/scripts
-docker/server
+docker/backup
+
+#Python VirtualEnv
+venv
