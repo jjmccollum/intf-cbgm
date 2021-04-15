@@ -324,6 +324,7 @@ export default {
 
 <style lang="scss">
 /* textflow.vue */
+@import "bootstrap-custom";
 
 div.variant-textflow {
     path.link {

@@ -78,7 +78,7 @@ export default {
 
 <style lang="scss">
 /* flash_messages.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.vm-flash-messages {
     margin-top: 0;

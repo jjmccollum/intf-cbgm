@@ -84,7 +84,7 @@ export default {
 
 <style lang="scss">
 /* widgest/context_menu.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.vm-context-menu {
     position: static;

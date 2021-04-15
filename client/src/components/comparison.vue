@@ -121,7 +121,7 @@ export default {
 
 <style lang="scss">
 /* comparison.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.comparison_vm {
     div.navigator {

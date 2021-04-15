@@ -165,6 +165,7 @@ export default {
 
 <style lang="scss">
 /* find_relatives.vue */
+@import "bootstrap-custom";
 
 div.vm-find-relatives {
     div.columns {

@@ -82,7 +82,7 @@ export default {
 
 <style lang="scss">
 /* leitzeile.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 .vm-leitzeile {
     @media print {

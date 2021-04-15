@@ -56,7 +56,7 @@ export default {
 
 <style lang="scss">
 /* connectivity.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 .vm-connectivity {
     @media print {

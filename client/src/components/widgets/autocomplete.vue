@@ -152,7 +152,7 @@ export default {
 
 <style lang="scss">
 /* widgets/autocomplete.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.vm-autocomplete {
     .form-control {

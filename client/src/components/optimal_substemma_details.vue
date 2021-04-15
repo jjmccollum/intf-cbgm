@@ -111,7 +111,7 @@ export default {
 
 <style lang="scss">
 /* optimal_substemma_details.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.vm-optimal-substemma-details {
     height: 0;

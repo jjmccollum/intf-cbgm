@@ -130,6 +130,7 @@ export default {
 
 <style lang="scss">
 /* navigator.vue */
+@import "bootstrap-custom";
 
 .vm-navigator {
     @media print {
@@ -144,7 +145,6 @@ export default {
         &[name=siglum] {
             text-align: left;
             border-right-width: 0;
-            width: 4.5em;
         }
 
         &[name=word] {

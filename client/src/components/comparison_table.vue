@@ -209,7 +209,7 @@ export default {
 
 <style lang="scss">
 /* comparison_table.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 table.table {
     /* also valid for details table */

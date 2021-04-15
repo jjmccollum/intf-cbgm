@@ -56,7 +56,7 @@ export default {
 
 <style lang="scss">
 /* widgets/card_caption.vue */
-@import "bootstrap-custom.scss";
+@import "bootstrap-custom";
 
 div.vm-card-caption {
     min-width: max-content;
