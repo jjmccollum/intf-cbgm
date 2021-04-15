@@ -214,6 +214,12 @@ def copy_att (dba, parameters):
             DELETE FROM lac WHERE hsnr >= 500000;
             """, parameters)
 
+        # DV: This code produces parsing errors for "lesart"
+        # if book == 'Yasna':
+           # execute (conn, """
+           # UPDATE att SET lesart = regexp_replace(lesart,'\s','', 'g');
+           # """, parameters)
+
         if book == '2 Samuel':
             for t in ('att', 'lac'):
                 execute (conn, """
@@ -385,6 +391,13 @@ def copy_att (dba, parameters):
         SET lesart = ''
         WHERE lesart ~ '^om[.]?$';
         """, parameters)
+
+        # DV: temporarily add random
+        # execute (conn, """
+        # UPDATE att
+        # SET lesart = random()
+        # WHERE lesart ~ '^\s*$';
+        # """, parameters)
 
         if book == 'Acts':
             fix (conn, "Wrong hs Acts", """
@@ -676,7 +689,8 @@ def process_sigla (dba, parameters):
             WHERE (hs, begadr, endadr) = ('P74', 50124030, 50125002)
             """, parameters)
 
-        if book in ('Acts', 'Mark', 'John'):
+        # DV: added Yasna
+        if book in ('Acts', 'Mark', 'John','Yasna'):
             warn (conn, "Hs with more than one hsnr", HS_TO_HSNR_TEST, parameters)
 
             # fix duplicate readings by keeping only the alphabetically lowest labez
@@ -1788,7 +1802,7 @@ if __name__ == '__main__':
                                              # do not match 'A' and 'L2010' !!!
         parameters['re_comm']  = 'T[1-9]'    # commentaries
         parameters['re_labez'] = '^([a-y]|z[u-z])$'
-    if book == 'Mark':
+    if book in ('Mark','Yasna'):
         parameters['re_hs_t']      = '^(A|([P0L]?[1-9][0-9]*s?(-[1-9])?(C([1-9][a-z]?)?)?[*]?([AKL][1-9]?)?[Vr]*))$'
         parameters['re_hs']        = '^(A|MT|([P0L]?[1-9][0-9]*s?))'
         parameters['re_corr']      = 'C([*]|([1-9][a-z]?))?'  # correctors
