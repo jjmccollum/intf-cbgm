@@ -17,6 +17,9 @@
           <router-link class="biglink" :to="{ name: 'notes_list' }"
             >List of Notes</router-link
           >
+          <router-link class="biglink" :to="{ name: 'checks_list' }"
+            >List of Congruence Check Failures</router-link
+          >
           <router-link class="biglink" :to="{ name: 'opt_stemma' }"
             >Optimal Substemma</router-link
           >
