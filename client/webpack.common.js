@@ -85,10 +85,11 @@ module.exports = {
         new VueLoaderPlugin (),
     ],
     devServer: {
-        host: '127.0.6.1',
+        // host: '127.0.6.1',
+        host: '127.0.0.1',
         port: 8080,
         contentBase: './build',
-        public: 'ntg.fritz.box:8080',
+        // public: 'ntg.fritz.box:8080',
         headers: {
             'Access-Control-Allow-Origin'      : '*',
             'Access-Control-Allow-Credentials' : 'true',
