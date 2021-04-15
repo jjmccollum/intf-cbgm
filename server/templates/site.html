@@ -56,10 +56,12 @@
            {% endif %}
            {% endblock %}
       </div>
+      {% if current_user.username != 'students' %}
       <div class="container bs-docs-container">
         {% block content %}
         {% endblock %}
       </div>
+      {% endif %}
     </div>
     <div id="footer">
       {% block footer %}
