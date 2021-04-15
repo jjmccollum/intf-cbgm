@@ -5,7 +5,7 @@
       <!-- needs a nested container to expand the violet band to the screen edges -->
       <h1 class="container d-flex flex-row justify-content-between">
         <span class="caption">{{ route_meta.caption }}</span>
-        <span class="appname">{{ route_meta.caption === 'Projects' ? '' : current_application.name }}</span>
+        <span class="appname">{{ route_meta.caption === 'Genealogical Queries' ? '' : current_application.name }}</span>
       </h1>
     </div>
 

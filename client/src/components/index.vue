@@ -29,50 +29,9 @@
       <a class="biglink" href="/pdfs/GenQ4_Guide.pdf" target="_blank"
         >Short Guide (PDF)</a
       >
-
-      <p>
-        This new interface of the Genealogical Queries suite of tools is the
-        result of a collaboration of the AWK project “Novum Testamentum Graecum
-        - Editio Critica Maior” and the Cologne Center for eHumanities. –
-        Programming: Marcello Perathoner.
-      </p>
-
-      <div class="logos">
-        <a href="http://egora.uni-muenster.de/intf/index_en.shtml"
-          ><img :src="intf_logo"
-        /></a>
-        <a href="http://www.awk.nrw.de"><img :src="awk_logo"/></a>
-        <a href="http://cceh.uni-koeln.de"><img :src="cceh_logo"/></a>
-        <a href="https://www.uni-muenster.de/SCDH/"><img :src="scdh_logo"/></a>
-      </div>
-
-      <div class="gdpr">
-        <a href="https://www.portal.uni-koeln.de/datenschutz1.html"
-          >Data Privacy Statement</a
-        >
-      </div>
     </div>
   </div>
 </template>
-
-<script>
-/* import these images for the side-effect only: make webpack pack these files. */
-import intf_logo from "../images/intf2021.jpeg";
-import awk_logo from "../images/awk-logo-00.png";
-import cceh_logo from "../images/cceh-logo.png";
-import scdh_logo from "../images/scdh-logo.jpg";
-
-export default {
-  data: function() {
-    return {
-      intf_logo: intf_logo,
-      awk_logo: awk_logo,
-      cceh_logo: cceh_logo,
-      scdh_logo: scdh_logo
-    };
-  }
-};
-</script>
 
 <style lang="scss">
 /* index.vue */
@@ -86,15 +45,6 @@ div.vm-index {
 
   div.gdpr {
     margin-top: 1em;
-  }
-
-  div.logos {
-    margin-top: 2em;
-
-    img {
-      height: 100px;
-      padding-right: 1em;
-    }
   }
 }
 </style>
