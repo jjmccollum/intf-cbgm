@@ -2,6 +2,8 @@
 import os
 import fileinput
 import time
+import configparser
+from pathlib import Path
 
 """
 This file is part of the CBGM Project @ INTF - WWU Münster
@@ -14,16 +16,13 @@ under the terms of the MIT License; see LICENSE file for more details.
 Author: Dennis Voltz, SCDH @ WWU Münster
 """
 
+config_file = os.getenv('CBGM_CONFIG', 'wizard_config.ini')
+config = configparser.ConfigParser()
+config.read(config_file)
+
 # obligatory ascii art
 ascii_art = """
- ██████╗██████╗  ██████╗ ███╗   ███╗
-██╔════╝██╔══██╗██╔════╝ ████╗ ████║
-██║     ██████╔╝██║  ███╗██╔████╔██║
-██║     ██╔══██╗██║   ██║██║╚██╔╝██║
-╚██████╗██████╔╝╚██████╔╝██║ ╚═╝ ██║
- ╚═════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝
-
-  === SETUP WIZARD ===
+=== CBGM SETUP WIZARD ===
   
       |\          .(' *) ' .
      | \        ' .*) .'*
@@ -34,7 +33,7 @@ ascii_art = """
      ((((^))  /  \
    .-')))(((-'   /
       (((()) __/'
- jgs   )))( |
+       )))( |
         (()
          ))
 """
@@ -43,7 +42,9 @@ ascii_art = """
 project_data = {
     "book": "",
     "phase": "",
-    "shortcut": ""
+    "shortcut": "",
+    "path": config['general']['path']
+    #"path" : '/home/devolt/Projects/ntg/' # FIXME wrong path while debugging
 }
 
 global bcolors
@@ -68,7 +69,7 @@ def is_number(s):
         return False
 
 
-def new_project(project_data):
+def new_project(project_data, from_cfg):
     """
     starts a new project
     """
@@ -76,22 +77,18 @@ def new_project(project_data):
     # TODO new project has no set_write_access() and no save_and_load_edits()
 
 
-def new_phase(project_data):
+def new_phase(project_data, from_cfg):
     """
     starts a new phase with apparatus update (default)
     currently, there is no new phase WITHOUT apparatus update
     """
     print('Starting a New Phase with Apparatus Update.')
-    # FIXME hardcoded, read config file names?
-    BLOCKLIST = ['mark_ph3', 'mark_ph31', 'mark_ph32', 'acts_ph4', 'acts_ph5']
-    get_inputs(project_data)
-    if (project_data['book_and_phase'] in BLOCKLIST):
-        print(
-            f'{bcolors["ERROR"]}It is not allowed to overwrite existing phases!{bcolors["ENDC"]}')
-        return None
-    print('Step 1 of 9: Writing config file...')
+    user_input = False
+    while (user_input is False):
+        user_input = get_inputs(project_data)
+    print('Step 1 of 8: Writing config file...')
     write_db_config(project_data)
-    print('Step 2 of 9: Creating new Postgres Database...')
+    print('Step 2 of 8: Creating new Postgres Database...')
     create_new_psql_db(project_data)
     user_input = 'n'
     project_data = calc_preceding_phase(project_data)
@@ -99,19 +96,19 @@ def new_phase(project_data):
         f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
     if (user_input == 'y'):
         set_write_access(project_data)
-    print('Step 3 of 9: Dumping mySQL Tables...')
-    make_mysql_dumps(project_data)
-    print('Step 4 of 9: Creating mySQL Tables...')
+    print('Step 3 of 8: Creating mySQL Tables...')
+    if (project_data['remote'] is True):
+        fetch_remote_mysql_dumps(project_data)
     create_new_mysql_db(project_data)
-    print('Step 5 of 9: Running import and prepare scripts...')
+    print('Step 4 of 8: Running import and prepare scripts...')
     run_prepare_scripts(project_data)
-    print('Step 6 of 9: Loading saved edits...')
+    print('Step 5 of 8: Loading saved edits...')
     save_and_load_edits(project_data)
-    print('Step 7 of 9: Running CBGM script...')
+    print('Step 6 of 8: Running CBGM script...')
     run_cbgm_script(project_data)
-    print('Step 8 of 9: Adding db to active databases...')
+    print('Step 7 of 8: Adding db to active databases...')
     activate_db(project_data)
-    print('Step 9 of 9: Cleaning up...')
+    print('Step 8 of 8: Cleaning up...')
     cleaning_up(project_data)
     print('Done.')
     return project_data
@@ -121,6 +118,11 @@ def get_inputs(project_data):
     """
     Asks the user for necessary informations
     """
+    project_data['book'] = ''
+    project_data['phase'] = ''
+    project_data['shortcut'] = ''
+    project_data['backup_dir'] = ''
+
     while (project_data['book'] == ''):
         project_data['book'] = input(
             f'{bcolors["OKBLUE"]}> Name of Book (e.g. Mark)?: {bcolors["ENDC"]}')
@@ -141,6 +143,50 @@ def get_inputs(project_data):
     project_data['book_and_phase'] = project_data['book_l'] + \
         '_ph' + project_data['version']
     project_data['config_file'] = project_data['book_and_phase'] + '.conf'
+
+    # check if config file exists
+    conf_file = Path(project_data['path'] + 'instance/' +
+                     project_data['book_and_phase'] + '.conf')
+    if conf_file.is_file():
+        print(
+            f'{bcolors["ERROR"]}It is not allowed to overwrite configs for existing phases!{bcolors["ENDC"]}')
+        return False
+
+    project_data['backup_dir'] = '/backup/dumps/'
+    project_data['backup_dir'] = input(
+        f'{bcolors["OKBLUE"]}> Please specify path to backup folder (Default: /backup/dumps/)?: {bcolors["ENDC"]}')
+
+    # import from remote
+    remote = input(
+        f'{bcolors["OKBLUE"]}> Fetch mySQL data from remote server? (y/n): {bcolors["ENDC"]}')
+    if (remote == 'y'):
+        project_data['remote'] = True
+        project_data['remote_host'] = input(
+            f'{bcolors["OKBLUE"]}> Name of Remote Host (Default: intf.uni-muenster.de)?: {bcolors["ENDC"]}')
+        if project_data['remote_host'] == '':
+            project_data['remote_host'] = 'intf.uni-muenster.de'
+        project_data['remote_db_basetext'] = input(
+            f'{bcolors["OKBLUE"]}> Database Name of Basetext (Default: Apparat)?: {bcolors["ENDC"]}')
+        if project_data['remote_db_basetext'] == '':
+            project_data['remote_db_basetext'] = 'Apparat'
+        project_data['remote_table_basetext'] = input(
+            f'{bcolors["OKBLUE"]}> Name of Basetext Table (Default: Nestle29)?: {bcolors["ENDC"]}')
+        if project_data['remote_table_basetext'] == '':
+            project_data['remote_table_basetext'] = 'Nestle29'
+        project_data['basetext_dump'] = project_data['remote_table_basetext'] + '.dump'
+        project_data['basetext'] = project_data['remote_table_basetext']
+        project_data['remote_db_apparatus'] = input(
+            f'{bcolors["OKBLUE"]}> Name of Apparatus Database (Default: Apparat_annette)?: {bcolors["ENDC"]}')
+        if project_data['remote_db_apparatus'] == '':
+            project_data['remote_db_apparatus'] = 'Apparat_annette'
+    else:
+        # necessary data for database processing
+        project_data['remote'] = False
+        project_data['basetext_dump'] = input(
+            f'{bcolors["OKBLUE"]}> Please specify name of Basetext Dump (Default: Nestle29.dump)?: {bcolors["ENDC"]}')
+        if project_data['basetext_dump'] == '':
+            project_data['basetext_dump'] = 'Nestle29.dump'
+        project_data['basetext'] = project_data['basetext_dump'].replace('.dump', '')
 
     return project_data
 
@@ -193,8 +239,8 @@ def set_write_access(project_data):
         config_file = project_data['preceding_config']
         wa_string = 'WRITE_ACCESS="editor_' + \
             project_data['preceding_book_l'] + '"'
-        # FIXME do not hardcode path to config files
-        for line in fileinput.input(["/home/ntg/prj/ntg/ntg/instance/" + config_file], inplace=True):
+        current_path = project_data['path']
+        for line in fileinput.input([current_path + "instance/" + config_file], inplace=True):
             print(line.replace(wa_string, 'WRITE_ACCESS="nobody"'), end='')
     except Exception as e:
         print(
@@ -229,22 +275,20 @@ PGUSER="ntg"
 MYSQL_CONF="~/.my.cnf"
 MYSQL_GROUP="mysql"
 
-MYSQL_ECM_DB="ECM_{0}_Ph{3}"
+MYSQL_ECM_DB="DB_{0}_Ph{3}"
 MYSQL_ATT_TABLES="{4}\d+"
 MYSQL_LAC_TABLES="{4}\d+lac"
-MYSQL_VG_DB="ECM_{0}_Ph{3}"
 
-MYSQL_NESTLE_DB="Nestle29"
-MYSQL_NESTLE_TABLE="Nestle29"
+MYSQL_NESTLE_DB="{5}"
+MYSQL_NESTLE_TABLE="{5}"
 """
 
     print('Writing db config file.')
     pf = project_data['config_file']
 
-    # FIXME do not hardcode path to config files
-    with open('/home/ntg/prj/ntg/ntg/instance/' + project_data['config_file'], "w") as w:
-        w.write(configuration.format(project_data['book'], project_data['phase'],
-                                     project_data['book_l'], project_data['version'], project_data['shortcut']))
+    with open(project_data['path'] + 'instance/' + project_data['config_file'], "w") as w:
+        w.write(configuration.format(project_data['book'], project_data['phase'], project_data['book_l'],
+                                     project_data['version'], project_data['shortcut'], project_data['basetext']))
 
     print('Done.')
 
@@ -254,8 +298,7 @@ def activate_db(project_data):
     adds the new phase/project to the file active_databases
     """
     print('Adding Database to Active Databases.')
-    # FIXME a hardcoded path
-    os.chdir('/home/ntg/prj/ntg/ntg/scripts/cceh')
+    os.chdir(project_data['path'] + 'scripts/cceh')
     book_and_phase = project_data['book_and_phase']
     try:
         with open("active_databases", "r") as f:
@@ -291,53 +334,65 @@ def create_new_psql_db(project_data):
     os.system(f'sudo -u postgres psql -c "DROP DATABASE IF EXISTS {psql_db};"')
 
     print(f'Creating Postgres Database with name {psql_db}.')
+    current_path = project_data['path']
     os.system(
-        f'sudo -u postgres /home/ntg/prj/ntg/ntg/scripts/cceh/create_database.sh {psql_db}')
+        f'sudo -u postgres {current_path}scripts/cceh/create_database.sh {psql_db}')
     return None
 
 
-def make_mysql_dumps(project_data):
+def fetch_remote_mysql_dumps(project_data):
     psql_db = project_data['book_and_phase']
-    print('Dumping Nestle from remote.')
-    # FIXME this should be made configurable
-    os.system('rm /backup/dumps/Nestle29.dump')
+    btd = project_data['basetext_dump']
+    bd = project_data['backup_dir']
+    rh = project_data['remote_host']
+    rdbbt = project_data['remote_db_basetext']
+    rtbt = project_data['remote_table_basetext']
+    rdbapp = project_data['remote_db_apparatus']
+
+    print('Dumping Basetext from remote.')
+    os.system(f'rm {bd}{btd}')
     os.system(
-        'sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/Nestle29.dump Apparat Nestle29')
+        f'sudo -u ntg mysqldump -h {rh} -r {bd}{btd} {rdbbt} {rtbt}')
     print('Done dumping.')
-    print('Dumping Apparat from remote. This may take a while...')
-    os.system(f'rm /backup/dumps/{psql_db}')
+    os.system(f'rm {bd}{psql_db}')
+    print('Dumping Apparatus from remote. This may take a while...')
     os.system(
-        f'sudo -u ntg mysqldump -h intf.uni-muenster.de -r /backup/dumps/{psql_db} Apparat_annette')
+        f'sudo -u ntg mysqldump -h {rh} -r {bd}{psql_db} {rdbapp}')
     print('Done dumping.')
     return None
 
 
 def create_new_mysql_db(project_data):
-    mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
+    mysql_db = 'DB_' + project_data['book'] + '_Ph' + project_data['version']
     psql_db = project_data['book_and_phase']
+    bd = project_data['backup_dir']
+    basetext_dump = project_data['basetext_dump']
+    base = project_data['basetext']
+
     print('Dropping old mysql database.')
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
-    os.system('mysql -e "DROP DATABASE IF EXISTS Nestle29;"')
+    os.system(f'mysql -e "DROP DATABASE IF EXISTS {base};"')
 
     print(f'Creating new mysql database with name "{mysql_db}".')
-    os.system(f'mysql -e "CREATE DATABASE {mysql_db}"')
-    os.system('mysql -e "CREATE DATABASE Nestle29"')
-    print("Generating Nestle29 mySQL Database.")
-    os.system('cat /backup/dumps/Nestle29.dump | mysql -D Nestle29')
+    os.system(f'mysql -e "CREATE DATABASE {mysql_db};"')
+    os.system(f'mysql -e "CREATE DATABASE {base};"')
+
+    print(f'Generating {base} mySQL Database.')
+    os.system(f'cat {bd}{basetext_dump} | mysql -D {base}')
     print(f'Generating {psql_db} mySQL Database. This may take a while...')
-    os.system(f'cat /backup/dumps/{psql_db} | mysql -D {mysql_db}')
+    os.system(f'cat {bd}{psql_db} | mysql -D {mysql_db}')
     return None
 
 
 def run_prepare_scripts(project_data):
     cf = project_data['config_file']
     print('Running Import Script.')
-    os.chdir('/home/ntg/prj/ntg/ntg')
+    os.chdir(project_data['path'])
     # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
     print('Running Prepare Script.')
-    os.chdir('/home/ntg/prj/ntg/ntg')
+    os.chdir(project_data['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.prepare -vvv instance/{cf}')
     return None
@@ -347,11 +402,11 @@ def save_and_load_edits(project_data):
     cf = project_data['config_file']
     pcf = project_data['preceding_config']
     print('Saving Edits.')
-    os.chdir('/home/ntg/prj/ntg/ntg')
+    os.chdir(project_data['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.save_edits -vvv -o saved_edits.xml instance/{pcf}')
     print('Loading Edits.')
-    os.chdir('/home/ntg/prj/ntg/ntg')
+    os.chdir(project_data['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.load_edits -vvv -i saved_edits.xml instance/{cf}')
     return None
@@ -360,7 +415,7 @@ def save_and_load_edits(project_data):
 def run_cbgm_script(project_data):
     cf = project_data['config_file']
     print('Running CBGM Script.')
-    os.chdir('/home/ntg/prj/ntg/ntg')
+    os.chdir(project_data['path'])
     os.system(f'sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
     print('Restarting Server.')
     os.system('/bin/systemctl restart ntg')
@@ -368,9 +423,10 @@ def run_cbgm_script(project_data):
 
 
 def cleaning_up(project_data):
-    mysql_db = 'ECM_' + project_data['book'] + '_Ph' + project_data['version']
+    mysql_db = 'DB_' + project_data['book'] + '_Ph' + project_data['version']
+    basetext = project_data['basetext']
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
-    os.system('mysql -e "DROP DATABASE IF EXISTS Nestle29;"')
+    os.system(f'mysql -e "DROP DATABASE IF EXISTS {basetext};"')
     return None
 
 # ===========
@@ -381,9 +437,17 @@ def cleaning_up(project_data):
 # note: run this script via "sudo" to get all systemrights
 print(ascii_art)
 choice = input(
-    f'PLEASE SELECT:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
+    f'PLEASE SELECT TYPE:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
 
+from_cfg = input(
+    f'PLEASE SELECT DATA SOURCE:\n(0) Using config (wizard_config.ini)\n(1) Using interactive terminal\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
+
+# TODO add non interactive variant
+
+if from_cfg == '':
+    from_cfg = 0
+from_cfg = not bool(int(from_cfg))
 if choice == '1':
-    new_project(project_data)
+    new_project(project_data, from_cfg)
 else:
-    new_phase(project_data)
+    new_phase(project_data, from_cfg)
