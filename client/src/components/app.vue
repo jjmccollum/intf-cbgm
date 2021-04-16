@@ -63,7 +63,7 @@ const router = new VueRouter({
       name: "index",
       props: true,
       meta: {
-        caption: "",
+        caption: "Genealogical Queries",
         home: { caption: "INTF", route: "external.intf" },
         projects: { caption: "Projects", route: "prj_list" }
         // home: { caption: "Back", route: "prj_list" }
