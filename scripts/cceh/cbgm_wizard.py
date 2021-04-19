@@ -76,9 +76,33 @@ def new_project(project_data, from_cfg):
     """
     starts a new project
     """
-    print('Starting a New Project.')
-    # TODO new project has no set_write_access() and no save_and_load_edits()
-
+    print('Starting a new Project.')
+    if (not from_cfg):
+        user_input = False
+        while (user_input is False):
+            user_input = get_inputs(project_data)
+    else:
+        valid_cfg = read_configuration(project_data)
+    if not valid_cfg:  # eject if invalid
+        return
+    print('Step 1 of 7: Writing config file...')
+    write_db_config(project_data)
+    print('Step 2 of 7: Creating new Postgres Database...')
+    create_new_psql_db(project_data)
+    print('Step 3 of 7: Creating mySQL Tables...')
+    if (project_data['remote'] is True):
+        fetch_remote_mysql_dumps(project_data)
+    create_new_mysql_db(project_data)
+    print('Step 4 of 7: Running import and prepare scripts...')
+    run_prepare_scripts(project_data)
+    print('Step 5 of 7: Running CBGM script...')
+    run_cbgm_script(project_data)
+    print('Step 6 of 7: Adding db to active databases...')
+    activate_db(project_data)
+    print('Step 7 of 7: Cleaning up...')
+    cleaning_up(project_data)
+    print('Done.')
+    return project_data
 
 def new_phase(project_data, from_cfg):
     """
@@ -92,7 +116,7 @@ def new_phase(project_data, from_cfg):
             user_input = get_inputs(project_data)
     else:
         valid_cfg = read_configuration(project_data)
-    if not valid_cfg: # eject if invalid
+    if not valid_cfg:  # eject if invalid
         return
     print('Step 1 of 8: Writing config file...')
     write_db_config(project_data)
@@ -137,13 +161,14 @@ def read_configuration(project_data):
     project_data['backup_dir'] = config['general']['backup_dir']
     project_data['remote'] = config['general']['use_remote_db']
     project_data['basetext_dump'] = config['general']['basetext_dump_file']
-    project_data['basetext'] = project_data['basetext_dump'].replace('.dump', '')
+    project_data['basetext'] = project_data['basetext_dump'].replace(
+        '.dump', '')
 
     if not is_number(project_data['phase']):
         print(
             f'{bcolors["ERROR"]}ERROR: Could not parse Phase information. Is it a valid number?{bcolors["ENDC"]}')
         return False
-    
+
     # generate additional project data
     project_data['book_l'] = project_data['book'].lower()
     project_data['version'] = project_data['phase'].replace('.', '')
@@ -160,6 +185,7 @@ def read_configuration(project_data):
         return False
 
     return project_data
+
 
 def get_inputs(project_data):
     """
@@ -234,7 +260,8 @@ def get_inputs(project_data):
             f'{bcolors["OKBLUE"]}> Please specify name of Basetext Dump (Default: Nestle29.dump)?: {bcolors["ENDC"]}')
         if project_data['basetext_dump'] == '':
             project_data['basetext_dump'] = 'Nestle29.dump'
-        project_data['basetext'] = project_data['basetext_dump'].replace('.dump', '')
+        project_data['basetext'] = project_data['basetext_dump'].replace(
+            '.dump', '')
 
     return project_data
 
@@ -324,20 +351,26 @@ MYSQL_CONF="~/.my.cnf"
 MYSQL_GROUP="mysql"
 
 MYSQL_ECM_DB="DB_{0}_Ph{3}"
-MYSQL_ATT_TABLES="{4}\d+"
-MYSQL_LAC_TABLES="{4}\d+lac"
+MYSQL_ATT_TABLES="{6}"
+MYSQL_LAC_TABLES="{7}"
 MYSQL_VG_DB="DB_{0}_Ph{3}"
 
 MYSQL_NESTLE_DB="{5}"
-MYSQL_NESTLE_TABLE="{5}"
+MYSQL_NESTLE_TABLE="{8}"
 """
 
     print('Writing db config file.')
     pf = project_data['config_file']
 
+    # FIXME for interactive mode, remove config reading and use project_data obj
+    att = config['project']['att_table']
+    lac = config['project']['lac_table']
+    btt = config['project']['basetext_table']
+    
     with open(project_data['path'] + 'instance/' + project_data['config_file'], "w") as w:
         w.write(configuration.format(project_data['book'], project_data['phase'], project_data['book_l'],
-                                     project_data['version'], project_data['shortcut'], project_data['basetext']))
+                                     project_data['version'], project_data['shortcut'], project_data['basetext'], 
+                                     att, lac, btt))
 
     print('Done.')
 
