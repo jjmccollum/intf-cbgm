@@ -20,6 +20,7 @@ config_file = os.getenv('CBGM_CONFIG', 'wizard_config.ini')
 config = configparser.ConfigParser()
 config.read(config_file)
 
+
 # obligatory ascii art
 ascii_art = """
 === CBGM SETUP WIZARD ===
@@ -44,7 +45,6 @@ project_data = {
     "phase": "",
     "shortcut": "",
     "path": config['general']['path']
-    #"path" : '/home/devolt/Projects/ntg/' # FIXME wrong path while debugging
 }
 
 global bcolors
@@ -83,19 +83,29 @@ def new_phase(project_data, from_cfg):
     currently, there is no new phase WITHOUT apparatus update
     """
     print('Starting a New Phase with Apparatus Update.')
-    user_input = False
-    while (user_input is False):
-        user_input = get_inputs(project_data)
+    if (not from_cfg):
+        user_input = False
+        while (user_input is False):
+            user_input = get_inputs(project_data)
+    else:
+        valid_cfg = read_configuration(project_data)
+    if not valid_cfg: # eject if invalid
+        return
     print('Step 1 of 8: Writing config file...')
     write_db_config(project_data)
     print('Step 2 of 8: Creating new Postgres Database...')
     create_new_psql_db(project_data)
-    user_input = 'n'
     project_data = calc_preceding_phase(project_data)
-    user_input = input(
-        f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
-    if (user_input == 'y'):
-        set_write_access(project_data)
+    if (not from_cfg):
+        user_input = 'n'
+        user_input = input(
+            f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
+        if (user_input == 'y'):
+            set_write_access(project_data)
+    else:
+        # setting write access of former phase
+        if config['project']['read_only_for_preceding']:
+            set_write_access(project_data)
     print('Step 3 of 8: Creating mySQL Tables...')
     if (project_data['remote'] is True):
         fetch_remote_mysql_dumps(project_data)
@@ -113,6 +123,40 @@ def new_phase(project_data, from_cfg):
     print('Done.')
     return project_data
 
+
+def read_configuration(project_data):
+    """
+    Reads all user informations from wizard_config.ini
+    """
+    project_data['book'] = config['project']['book']
+    project_data['phase'] = config['project']['phase']
+    project_data['shortcut'] = config['project']['shortcut']
+    project_data['backup_dir'] = config['general']['backup_dir']
+    project_data['remote'] = config['general']['use_remote_db']
+    project_data['basetext_dump'] = config['general']['basetext_dump_file']
+    project_data['basetext'] = project_data['basetext_dump'].replace('.dump', '')
+
+    if not is_number(project_data['phase']):
+        print(
+            f'{bcolors["ERROR"]}ERROR: Could not parse Phase information. Is it a valid number?{bcolors["ENDC"]}')
+        return False
+    
+    # generate additional project data
+    project_data['book_l'] = project_data['book'].lower()
+    project_data['version'] = project_data['phase'].replace('.', '')
+    project_data['book_and_phase'] = project_data['book_l'] + \
+        '_ph' + project_data['version']
+    project_data['config_file'] = project_data['book_and_phase'] + '.conf'
+
+    # check if config file exists
+    conf_file = Path(project_data['path'] + 'instance/' +
+                     project_data['book_and_phase'] + '.conf')
+    if conf_file.is_file():
+        print(
+            f'{bcolors["ERROR"]}It is not allowed to overwrite configs for existing phases!{bcolors["ENDC"]}')
+        return False
+
+    return project_data
 
 def get_inputs(project_data):
     """
@@ -152,9 +196,10 @@ def get_inputs(project_data):
             f'{bcolors["ERROR"]}It is not allowed to overwrite configs for existing phases!{bcolors["ENDC"]}')
         return False
 
-    project_data['backup_dir'] = '/backup/dumps/'
     project_data['backup_dir'] = input(
         f'{bcolors["OKBLUE"]}> Please specify path to backup folder (Default: /backup/dumps/)?: {bcolors["ENDC"]}')
+    if project_data['backup_dir'] == '':
+        project_data['backup_dir'] = '/backup/dumps/'
 
     # import from remote
     remote = input(
@@ -439,14 +484,17 @@ print(ascii_art)
 choice = input(
     f'PLEASE SELECT TYPE:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
 
-from_cfg = input(
-    f'PLEASE SELECT DATA SOURCE:\n(0) Using config (wizard_config.ini)\n(1) Using interactive terminal\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
+print(f'\n{bcolors["WARNING"]}Important: Interactive Mode is currently in development.\nPlease use wizard_config.ini before starting!{bcolors["ENDC"]}\n')
 
-# TODO add non interactive variant
+# TODO finish interactive mode
+# from_cfg = input(
+#     f'PLEASE SELECT DATA SOURCE:\n(0) Using config (wizard_config.ini)\n(1) Using interactive terminal\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
+from_cfg = '0'
+# if from_cfg == '':
+#     from_cfg = 0
 
-if from_cfg == '':
-    from_cfg = 0
 from_cfg = not bool(int(from_cfg))
+
 if choice == '1':
     new_project(project_data, from_cfg)
 else:
