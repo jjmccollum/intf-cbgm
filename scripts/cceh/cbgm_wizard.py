@@ -16,7 +16,10 @@ under the terms of the MIT License; see LICENSE file for more details.
 Author: Dennis Voltz, SCDH @ WWU Münster
 """
 
-config_file = os.getenv('CBGM_CONFIG', 'wizard_config.ini')
+# Adjust local path to wizard config file
+path_to_config = '/home/ntg/prj/ntg/ntg/wizard_config.ini'
+
+config_file = os.getenv('CBGM_CONFIG', path_to_config)
 config = configparser.ConfigParser()
 config.read(config_file)
 
