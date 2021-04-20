@@ -16,14 +16,6 @@ under the terms of the MIT License; see LICENSE file for more details.
 Author: Dennis Voltz, SCDH @ WWU Münster
 """
 
-# Adjust local path to wizard config file
-path_to_config = '/home/ntg/prj/ntg/ntg/wizard_config.ini'
-
-config_file = os.getenv('CBGM_CONFIG', path_to_config)
-config = configparser.ConfigParser()
-config.read(config_file)
-
-
 # obligatory ascii art
 ascii_art = """
 === CBGM SETUP WIZARD ===
@@ -41,14 +33,6 @@ ascii_art = """
         (()
          ))
 """
-
-# variables
-project_data = {
-    "book": "",
-    "phase": "",
-    "shortcut": "",
-    "path": config['general']['path']
-}
 
 global bcolors
 bcolors = {
@@ -71,76 +55,30 @@ def is_number(s):
     except ValueError:
         return False
 
-
-def new_project(project_data, from_cfg):
-    """
-    starts a new project
-    """
-    print('Starting a new Project.')
-    if (not from_cfg):
-        user_input = False
-        while (user_input is False):
-            user_input = get_inputs(project_data)
-    else:
-        valid_cfg = read_configuration(project_data)
-    if not valid_cfg:  # eject if invalid
-        return
-    print('Step 1 of 7: Writing config file...')
-    write_db_config(project_data)
-    print('Step 2 of 7: Creating new Postgres Database...')
-    create_new_psql_db(project_data)
-    print('Step 3 of 7: Creating mySQL Tables...')
-    if (project_data['remote'] is True):
-        fetch_remote_mysql_dumps(project_data)
-    create_new_mysql_db(project_data)
-    print('Step 4 of 7: Running import and prepare scripts...')
-    run_prepare_scripts(project_data)
-    print('Step 5 of 7: Running CBGM script...')
-    run_cbgm_script(project_data)
-    print('Step 6 of 7: Adding db to active databases...')
-    activate_db(project_data)
-    print('Step 7 of 7: Cleaning up...')
-    cleaning_up(project_data)
-    print('Done.')
-    return project_data
-
-def new_phase(project_data, from_cfg):
+def start(project_data,task_type):
     """
     starts a new phase with apparatus update (default)
     currently, there is no new phase WITHOUT apparatus update
     """
     print('Starting a New Phase with Apparatus Update.')
-    if (not from_cfg):
-        user_input = False
-        while (user_input is False):
-            user_input = get_inputs(project_data)
-    else:
-        valid_cfg = read_configuration(project_data)
-    if not valid_cfg:  # eject if invalid
-        return
     print('Step 1 of 8: Writing config file...')
     write_db_config(project_data)
     print('Step 2 of 8: Creating new Postgres Database...')
     create_new_psql_db(project_data)
-    project_data = calc_preceding_phase(project_data)
-    if (not from_cfg):
-        user_input = 'n'
-        user_input = input(
-            f'{bcolors["OKBLUE"]}> Set database of preceding phase to READ ONLY? (y/n): {bcolors["ENDC"]}')
-        if (user_input == 'y'):
-            set_write_access(project_data)
-    else:
-        # setting write access of former phase
-        if config['project']['read_only_for_preceding']:
+    # setting write access of former phase
+    if task_type == 'phase':
+        project_data = calc_preceding_phase(project_data)
+        if project_data['project']['read_only_for_preceding']:
             set_write_access(project_data)
     print('Step 3 of 8: Creating mySQL Tables...')
-    if (project_data['remote'] is True):
-        fetch_remote_mysql_dumps(project_data)
     create_new_mysql_db(project_data)
     print('Step 4 of 8: Running import and prepare scripts...')
     run_prepare_scripts(project_data)
-    print('Step 5 of 8: Loading saved edits...')
-    save_and_load_edits(project_data)
+    if task_type == 'phase':
+        print('Step 5 of 8: Loading saved edits...')
+        save_and_load_edits(project_data)
+    else:
+        print('Step 5 of 8: Skipping saved edits in new projects...')
     print('Step 6 of 8: Running CBGM script...')
     run_cbgm_script(project_data)
     print('Step 7 of 8: Adding db to active databases...')
@@ -155,116 +93,30 @@ def read_configuration(project_data):
     """
     Reads all user informations from wizard_config.ini
     """
-    project_data['book'] = config['project']['book']
-    project_data['phase'] = config['project']['phase']
-    project_data['shortcut'] = config['project']['shortcut']
-    project_data['backup_dir'] = config['general']['backup_dir']
-    project_data['remote'] = config['general']['use_remote_db']
-    project_data['basetext_dump'] = config['general']['basetext_dump_file']
-    project_data['basetext'] = project_data['basetext_dump'].replace(
+    project_data['general']['basetext'] = project_data['general']['basetext_dump_file'].replace(
         '.dump', '')
 
-    if not is_number(project_data['phase']):
+    if not is_number(project_data['project']['phase']):
         print(
             f'{bcolors["ERROR"]}ERROR: Could not parse Phase information. Is it a valid number?{bcolors["ENDC"]}')
         return False
 
     # generate additional project data
-    project_data['book_l'] = project_data['book'].lower()
-    project_data['version'] = project_data['phase'].replace('.', '')
-    project_data['book_and_phase'] = project_data['book_l'] + \
-        '_ph' + project_data['version']
-    project_data['config_file'] = project_data['book_and_phase'] + '.conf'
+    project_data['project']['book_l'] = project_data['project']['book'].lower()
+    project_data['project']['version'] = project_data['project']['phase'].replace('.', '')
+    project_data['project']['book_and_phase'] = project_data['project']['book_l'] + \
+        '_ph' + project_data['project']['version']
+    project_data['project']['config_file'] = project_data['project']['book_and_phase'] + '.conf'
 
     # check if config file exists
-    conf_file = Path(project_data['path'] + 'instance/' +
-                     project_data['book_and_phase'] + '.conf')
+    conf_file = Path(project_data['general']['path'] + 'instance/' +
+                     project_data['project']['book_and_phase'] + '.conf')
     if conf_file.is_file():
         print(
             f'{bcolors["ERROR"]}It is not allowed to overwrite configs for existing phases!{bcolors["ENDC"]}')
         return False
 
     return project_data
-
-
-def get_inputs(project_data):
-    """
-    Asks the user for necessary informations
-    """
-    project_data['book'] = ''
-    project_data['phase'] = ''
-    project_data['shortcut'] = ''
-    project_data['backup_dir'] = ''
-
-    while (project_data['book'] == ''):
-        project_data['book'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Book (e.g. Mark)?: {bcolors["ENDC"]}')
-    while (project_data['phase'] == ''):
-        project_data['phase'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Phase (e.g. 3.2)?: {bcolors["ENDC"]}')
-        if not is_number(project_data['phase']):
-            print(
-                f'{bcolors["ERROR"]}ERROR: Could not parse Phase information. Is it a valid number?{bcolors["ENDC"]}')
-            project_data['phase'] = ''
-    while (project_data['shortcut'] == ''):
-        project_data['shortcut'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Shortcut (e.g. Mk)?: {bcolors["ENDC"]}')
-
-    # generate additional project data
-    project_data['book_l'] = project_data['book'].lower()
-    project_data['version'] = project_data['phase'].replace('.', '')
-    project_data['book_and_phase'] = project_data['book_l'] + \
-        '_ph' + project_data['version']
-    project_data['config_file'] = project_data['book_and_phase'] + '.conf'
-
-    # check if config file exists
-    conf_file = Path(project_data['path'] + 'instance/' +
-                     project_data['book_and_phase'] + '.conf')
-    if conf_file.is_file():
-        print(
-            f'{bcolors["ERROR"]}It is not allowed to overwrite configs for existing phases!{bcolors["ENDC"]}')
-        return False
-
-    project_data['backup_dir'] = input(
-        f'{bcolors["OKBLUE"]}> Please specify path to backup folder (Default: /backup/dumps/)?: {bcolors["ENDC"]}')
-    if project_data['backup_dir'] == '':
-        project_data['backup_dir'] = '/backup/dumps/'
-
-    # import from remote
-    remote = input(
-        f'{bcolors["OKBLUE"]}> Fetch mySQL data from remote server? (y/n): {bcolors["ENDC"]}')
-    if (remote == 'y'):
-        project_data['remote'] = True
-        project_data['remote_host'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Remote Host (Default: intf.uni-muenster.de)?: {bcolors["ENDC"]}')
-        if project_data['remote_host'] == '':
-            project_data['remote_host'] = 'intf.uni-muenster.de'
-        project_data['remote_db_basetext'] = input(
-            f'{bcolors["OKBLUE"]}> Database Name of Basetext (Default: Apparat)?: {bcolors["ENDC"]}')
-        if project_data['remote_db_basetext'] == '':
-            project_data['remote_db_basetext'] = 'Apparat'
-        project_data['remote_table_basetext'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Basetext Table (Default: Nestle29)?: {bcolors["ENDC"]}')
-        if project_data['remote_table_basetext'] == '':
-            project_data['remote_table_basetext'] = 'Nestle29'
-        project_data['basetext_dump'] = project_data['remote_table_basetext'] + '.dump'
-        project_data['basetext'] = project_data['remote_table_basetext']
-        project_data['remote_db_apparatus'] = input(
-            f'{bcolors["OKBLUE"]}> Name of Apparatus Database (Default: Apparat_annette)?: {bcolors["ENDC"]}')
-        if project_data['remote_db_apparatus'] == '':
-            project_data['remote_db_apparatus'] = 'Apparat_annette'
-    else:
-        # necessary data for database processing
-        project_data['remote'] = False
-        project_data['basetext_dump'] = input(
-            f'{bcolors["OKBLUE"]}> Please specify name of Basetext Dump (Default: Nestle29.dump)?: {bcolors["ENDC"]}')
-        if project_data['basetext_dump'] == '':
-            project_data['basetext_dump'] = 'Nestle29.dump'
-        project_data['basetext'] = project_data['basetext_dump'].replace(
-            '.dump', '')
-
-    return project_data
-
 
 def calc_preceding_phase(project_data):
     """
@@ -272,9 +124,9 @@ def calc_preceding_phase(project_data):
     """
 
     # calculate preceding phase number
-    preceding_version = project_data['version']
+    preceding_version = project_data['project']['version']
     try:
-        preceding_version = (int(project_data['version']))-1
+        preceding_version = (int(project_data['project']['version']))-1
         if preceding_version < 10:
             preceding_version = "0." + str(preceding_version)
         else:
@@ -286,7 +138,7 @@ def calc_preceding_phase(project_data):
             f'{bcolors["ERROR"]}ERROR: Could not parse Phase information. Is it a valid number?{bcolors["ENDC"]}')
         print(e)
 
-    preceding_book = project_data['book']
+    preceding_book = project_data['project']['book']
     pre_phase_correct = 'n'  # set to "no"
     pre_phase_correct = input(
         f'{bcolors["OKBLUE"]}> Is "{preceding_book} {preceding_version}" the correct name for the preceding phase? (y/n): {bcolors["ENDC"]}')
@@ -314,7 +166,7 @@ def set_write_access(project_data):
         config_file = project_data['preceding_config']
         wa_string = 'WRITE_ACCESS="editor_' + \
             project_data['preceding_book_l'] + '"'
-        current_path = project_data['path']
+        current_path = project_data['general']['path']
         for line in fileinput.input([current_path + "instance/" + config_file], inplace=True):
             print(line.replace(wa_string, 'WRITE_ACCESS="nobody"'), end='')
     except Exception as e:
@@ -330,6 +182,7 @@ def set_write_access(project_data):
 def write_db_config(project_data):
     """
     writes the new db config file via template
+    we have to use format() and ids because of multiline string literal
     """
     configuration = """APPLICATION_NAME="{0} Phase {1}"
 APPLICATION_ROOT="{2}/ph{3}/"
@@ -360,17 +213,18 @@ MYSQL_NESTLE_TABLE="{8}"
 """
 
     print('Writing db config file.')
-    pf = project_data['config_file']
-
-    # FIXME for interactive mode, remove config reading and use project_data obj
-    att = config['project']['att_table']
-    lac = config['project']['lac_table']
-    btt = config['project']['basetext_table']
-    
-    with open(project_data['path'] + 'instance/' + project_data['config_file'], "w") as w:
-        w.write(configuration.format(project_data['book'], project_data['phase'], project_data['book_l'],
-                                     project_data['version'], project_data['shortcut'], project_data['basetext'], 
-                                     att, lac, btt))
+    with open(project_data['general']['path'] + 'instance/' + project_data['project']['config_file'], "w") as w:
+        w.write(configuration.format(
+            project_data['project']['book'], # as 0
+            project_data['project']['phase'],
+            project_data['project']['book_l'],
+            project_data['project']['version'],
+            project_data['project']['shortcut'],
+            project_data['general']['basetext'],
+            project_data['project']['att_table'],
+            project_data['project']['lac_table'],
+            project_data['project']['basetext_table'] # as 8
+            ))
 
     print('Done.')
 
@@ -380,8 +234,8 @@ def activate_db(project_data):
     adds the new phase/project to the file active_databases
     """
     print('Adding Database to Active Databases.')
-    os.chdir(project_data['path'] + 'scripts/cceh')
-    book_and_phase = project_data['book_and_phase']
+    os.chdir(project_data['general']['path'] + 'scripts/cceh')
+    book_and_phase = project_data['project']['book_and_phase']
     try:
         with open("active_databases", "r") as f:
             for line in f:
@@ -406,7 +260,7 @@ def activate_db(project_data):
 
 
 def create_new_psql_db(project_data):
-    psql_db = project_data['book_and_phase']
+    psql_db = project_data['project']['book_and_phase']
     print(f'Dropping Postgres Database with name {psql_db}.')
     # terminate for active users (not possible with formatted strings)
     query = "sudo -u postgres psql" + \
@@ -416,40 +270,21 @@ def create_new_psql_db(project_data):
     os.system(f'sudo -u postgres psql -c "DROP DATABASE IF EXISTS {psql_db};"')
 
     print(f'Creating Postgres Database with name {psql_db}.')
-    current_path = project_data['path']
+    current_path = project_data['general']['path']
     os.system(
         f'sudo -u postgres {current_path}scripts/cceh/create_database.sh {psql_db}')
     return None
 
-
-def fetch_remote_mysql_dumps(project_data):
-    psql_db = project_data['book_and_phase']
-    btd = project_data['basetext_dump']
-    bd = project_data['backup_dir']
-    rh = project_data['remote_host']
-    rdbbt = project_data['remote_db_basetext']
-    rtbt = project_data['remote_table_basetext']
-    rdbapp = project_data['remote_db_apparatus']
-
-    print('Dumping Basetext from remote.')
-    os.system(f'rm {bd}{btd}')
-    os.system(
-        f'sudo -u ntg mysqldump -h {rh} -r {bd}{btd} {rdbbt} {rtbt}')
-    print('Done dumping.')
-    os.system(f'rm {bd}{psql_db}')
-    print('Dumping Apparatus from remote. This may take a while...')
-    os.system(
-        f'sudo -u ntg mysqldump -h {rh} -r {bd}{psql_db} {rdbapp}')
-    print('Done dumping.')
-    return None
-
-
 def create_new_mysql_db(project_data):
-    mysql_db = 'DB_' + project_data['book'] + '_Ph' + project_data['version']
-    psql_db = project_data['book_and_phase']
-    bd = project_data['backup_dir']
-    basetext_dump = project_data['basetext_dump']
-    base = project_data['basetext']
+    # name of new databases
+    mysql_db = 'DB_' + project_data['project']['book'] + '_Ph' + project_data['project']['version']
+
+    # set some variables
+    bd = project_data['general']['backup_dir']
+    basetext_dump = project_data['general']['basetext_dump_file']
+    app_dump_file = project_data['general']['apparatus_dump_file']
+    app_dump = app_dump_file.replace('.dump','')
+    base = project_data['general']['basetext']
 
     print('Dropping old mysql database.')
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
@@ -461,43 +296,43 @@ def create_new_mysql_db(project_data):
 
     print(f'Generating {base} mySQL Database.')
     os.system(f'cat {bd}{basetext_dump} | mysql -D {base}')
-    print(f'Generating {psql_db} mySQL Database. This may take a while...')
-    os.system(f'cat {bd}{psql_db} | mysql -D {mysql_db}')
+    print(f'Generating {app_dump} mySQL Database. This may take a while...')
+    os.system(f'cat {bd}{app_dump_file} | mysql -D {mysql_db}')
     return None
 
 
 def run_prepare_scripts(project_data):
-    cf = project_data['config_file']
+    cf = project_data['project']['config_file']
     print('Running Import Script.')
-    os.chdir(project_data['path'])
+    os.chdir(project_data['general']['path'])
     # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
     print('Running Prepare Script.')
-    os.chdir(project_data['path'])
+    os.chdir(project_data['general']['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.prepare -vvv instance/{cf}')
     return None
 
 
 def save_and_load_edits(project_data):
-    cf = project_data['config_file']
+    cf = project_data['project']['config_file']
     pcf = project_data['preceding_config']
     print('Saving Edits.')
-    os.chdir(project_data['path'])
+    os.chdir(project_data['general']['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.save_edits -vvv -o saved_edits.xml instance/{pcf}')
     print('Loading Edits.')
-    os.chdir(project_data['path'])
+    os.chdir(project_data['general']['path'])
     os.system(
         f'sudo -u ntg python3 -m scripts.cceh.load_edits -vvv -i saved_edits.xml instance/{cf}')
     return None
 
 
 def run_cbgm_script(project_data):
-    cf = project_data['config_file']
+    cf = project_data['project']['config_file']
     print('Running CBGM Script.')
-    os.chdir(project_data['path'])
+    os.chdir(project_data['general']['path'])
     os.system(f'sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
     print('Restarting Server.')
     os.system('/bin/systemctl restart ntg')
@@ -505,34 +340,43 @@ def run_cbgm_script(project_data):
 
 
 def cleaning_up(project_data):
-    mysql_db = 'DB_' + project_data['book'] + '_Ph' + project_data['version']
-    basetext = project_data['basetext']
+    mysql_db = 'DB_' + project_data['project']['book'] + '_Ph' + project_data['project']['version']
+    basetext = project_data['general']['basetext']
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {mysql_db};"')
     os.system(f'mysql -e "DROP DATABASE IF EXISTS {basetext};"')
     return None
 
-# ===========
-# ENTRY POINT
-# ===========
+def main():
 
+    # note: run this script via "sudo" to get all systemrights
+    print(ascii_art)
 
-# note: run this script via "sudo" to get all systemrights
-print(ascii_art)
-choice = input(
-    f'PLEASE SELECT TYPE:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
+    choice = input(
+        f'PLEASE SELECT TYPE:\n(0) Starting a New Phase With Apparatus Update\n(1) Starting a New Project\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
 
-print(f'\n{bcolors["WARNING"]}Important: Interactive Mode is currently in development.\nPlease use wizard_config.ini before starting!{bcolors["ENDC"]}\n')
+    print('Please specify location of config file:')
+    print('(Default: /home/ntg/prj/ntg/ntg/wizard_config.ini)')
+    path_to_config = input(
+        f'{bcolors["OKBLUE"]}\n>: {bcolors["ENDC"]}')
 
-# TODO finish interactive mode
-# from_cfg = input(
-#     f'PLEASE SELECT DATA SOURCE:\n(0) Using config (wizard_config.ini)\n(1) Using interactive terminal\n{bcolors["OKBLUE"]}> (Default = 0): {bcolors["ENDC"]}')
-from_cfg = '0'
-# if from_cfg == '':
-#     from_cfg = 0
+    if path_to_config == '':
+        path_to_config = '/home/ntg/prj/ntg/ntg/wizard_config.ini'
 
-from_cfg = not bool(int(from_cfg))
+    config_file = os.getenv('CBGM_CONFIG', path_to_config)
+    config = configparser.ConfigParser()
+    config.read(config_file)
 
-if choice == '1':
-    new_project(project_data, from_cfg)
-else:
-    new_phase(project_data, from_cfg)
+    project_data = {s:dict(config.items(s)) for s in config.sections()}
+
+    valid_cfg = read_configuration(project_data)
+    if not valid_cfg:  # eject if invalid
+        return
+
+    if choice == '1':
+        task_type = 'project'
+    else:
+        task_type = 'phase'
+
+    start(project_data,task_type)
+
+main()
