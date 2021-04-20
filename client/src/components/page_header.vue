@@ -12,7 +12,7 @@
     <div
       class="login-nav container d-flex flex-row justify-content-end bs-docs-container"
     >
-    <div v-if="route_meta.caption != 'Genealogical Queries'">
+    <div v-if="route_meta.type != 'index'">
       <router-link :to="{ name: route_meta.projects.route }">{{
         route_meta.projects.caption
       }}</router-link>
