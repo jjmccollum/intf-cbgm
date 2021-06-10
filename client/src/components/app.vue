@@ -53,7 +53,7 @@ const router = new VueRouter({
       props: true,
       meta: {
         type: 'index',
-        caption: "Genealogical Queries",
+        caption: "CBGM",
         home: default_home,
         projects: { caption: "Projects", route: "prj_list" }
       }
@@ -65,7 +65,7 @@ const router = new VueRouter({
       props: true,
       meta: {
         type: 'overview',
-        caption: "Genealogical Queries ",
+        caption: "CBGM ",
         home: { caption: "INTF", route: "external.intf" },
         projects: { caption: "Projects", route: "prj_list" }
         // home: { caption: "Back", route: "prj_list" }
