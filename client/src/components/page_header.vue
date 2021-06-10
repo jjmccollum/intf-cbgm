@@ -22,7 +22,7 @@
       }}</router-link>
       &#xa0; | &#xa0;
       </div>
-      <a href="/pdfs/GenQ4_Guide.pdf" target="_blank">Short Guide (PDF)</a>
+      <a href="/pdfs/Short_Guide_CBGM_Mark_KW.pdf" target="_blank">Short Guide (PDF)</a>
       <template v-if="current_user.can_login">
         <template v-if="is_logged_in">
           &#xa0; | &#xa0;

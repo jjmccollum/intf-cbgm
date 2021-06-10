@@ -28,10 +28,6 @@
           >
         </div>
       </div>
-
-      <a class="biglink" href="/pdfs/GenQ4_Guide.pdf" target="_blank"
-        >Short Guide (PDF)</a
-      >
     </div>
   </div>
 </template>
