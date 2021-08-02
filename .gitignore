@@ -5,7 +5,6 @@ backups/
 node_modules/
 jsdoc/
 output/
-*pg_dump*
 instance/*.conf
 server/templates/schemas.xml
 pip-freeze.txt
@@ -93,7 +92,6 @@ docker/server
 docker/ntg_common
 docker/client
 docker/scripts
-docker/backup
 
 #Python VirtualEnv
 venv
