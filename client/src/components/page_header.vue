@@ -16,26 +16,22 @@
       <router-link :to="{ name: route_meta.projects.route }">{{
         route_meta.projects.caption
       }}</router-link>
-      &#xa0; | &#xa0;
+      <span>&#xa0; | &#xa0;</span>
       <router-link :to="{ name: route_meta.home.route }">{{
         route_meta.home.caption
       }}</router-link>
-      &#xa0; | &#xa0;
+      <span>&#xa0; | &#xa0;</span>
       </div>
-      <a href="/pdfs/Short_Guide_CBGM_Mark_KW.pdf" target="_blank">Short Guide (PDF)</a>
       <template v-if="current_user.can_login">
         <template v-if="is_logged_in">
-          &#xa0; | &#xa0;
           <a href="/user/profile" class="user-profile-link">
             <span class="fas fa-user" /> {{ current_user.username }}
           </a>
-          &#xa0; | &#xa0;
           <a href="/user/sign-out" class="user-logout-link">
             <span class="fas fa-sign-out-alt" /> Sign out
           </a>
         </template>
         <template v-else>
-          &#xa0; | &#xa0;
           <a href="/user/sign-in" class="user-login-link">
             <span class="fas fa-sign-in-alt" /> Sign in
           </a>
@@ -83,6 +79,9 @@ export default {
 @import "bootstrap-custom";
 
 div.vm-page-header {
+  background-color: #d2d2d2;
+  margin-bottom: 2rem;
+
   div.bs-docs-header {
     margin: 0;
     padding: ($spacer * 0.5) 0 ($spacer * 0.25) 0;
@@ -105,6 +104,9 @@ div.vm-page-header {
   div.login-nav {
     @media print {
       display: none !important;
+    }
+    a, span {
+      font-size: 18px;
     }
   }
 

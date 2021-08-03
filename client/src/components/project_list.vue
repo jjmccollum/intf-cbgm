@@ -24,6 +24,35 @@
       </table>
 
       <br><br>
+      <h4>Guides</h4>
+
+      <div class="container">
+          <div class="row">
+              <div class="col-sm-3">
+              <a href="/pdfs/Short_Guide_CBGM_Mark_KW.pdf" target="_blank">
+                <figure>
+                  <img :src="markguide" class="img-guide"/>
+                  <figcaption>Short Guide (PDF) for Mark</figcaption>
+                </figure> 
+              </a>
+              </div>
+              <div class="col-sm-3">
+                <a href="/pdfs/GenQ4_Guide.pdf" target="_blank">
+                  <figure>
+                    <img :src="actsguide" class="img-guide"/>
+                    <figcaption>Short Guide (PDF) for Acts</figcaption>
+                  </figure> 
+                </a>
+              </div>
+              <div class="col-sm-3">
+              </div>
+          </div>
+      </div>
+
+      
+
+
+      <br><br>
       <h4>Partners</h4>
       <div class="container logos">
           <div class="row">
@@ -43,7 +72,7 @@
 
       <br><br>
       <div class="gdpr">
-        <a href="https://www.portal.uni-koeln.de/datenschutz1.html"
+        <a href="https://www.uni-muenster.de/de/en/datenschutzerklaerung.html"
           >Data Privacy Statement</a
         >
       </div>
@@ -67,6 +96,8 @@ import intf_logo from "../images/intf2021.jpeg";
 import awk_logo from "../images/awk-logo-00.png";
 import cceh_logo from "../images/cceh-logo.png";
 import scdh_logo from "../images/scdh-logo.jpg";
+import actsguide from "../images/actsguide.jpg";
+import markguide from "../images/markguide.jpg";
 
 export default {
   data: function() {
@@ -74,7 +105,9 @@ export default {
       intf_logo: intf_logo,
       awk_logo: awk_logo,
       cceh_logo: cceh_logo,
-      scdh_logo: scdh_logo
+      scdh_logo: scdh_logo,
+      markguide: markguide,
+      actsguide: actsguide
     };
   }
 };
@@ -84,6 +117,11 @@ export default {
 /* project_list.vue */
 
 div.vm-project-list {
+
+    .img-guide {
+      height: 200px;
+    }
+
     td.app_name {
         width: 20%;
     }

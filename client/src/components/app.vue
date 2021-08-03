@@ -55,7 +55,7 @@ const router = new VueRouter({
         type: 'index',
         caption: "CBGM",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -66,8 +66,8 @@ const router = new VueRouter({
       meta: {
         type: 'overview',
         caption: "CBGM ",
-        home: { caption: "INTF", route: "external.intf" },
-        projects: { caption: "Projects", route: "prj_list" }
+        home: { caption: "INTF Website", route: "external.intf" },
+        projects: { caption: "Show all Projects", route: "prj_list" }
         // home: { caption: "Back", route: "prj_list" }
       }
     },
@@ -80,7 +80,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "Find Relatives",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -92,7 +92,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "Coherence and Textual Flow",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -104,7 +104,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "Comparison of Witnesses",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -116,7 +116,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "List of Notes",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -128,7 +128,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "List of Congruence Check Failures",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -140,7 +140,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "Optimal Substemma",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
     {
@@ -152,7 +152,7 @@ const router = new VueRouter({
         type: 'subpage',
         caption: "Minimum Set Cover",
         home: default_home,
-        projects: { caption: "Projects", route: "prj_list" }
+        projects: { caption: "Show all Projects", route: "prj_list" }
       }
     },
 
@@ -418,4 +418,15 @@ window.addEventListener("hashchange", function() {
 /* FIXME: this file is huge, maybe pick only the icons we use */
 @import "../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css";
 @import "../../node_modules/@fortawesome/fontawesome-free/css/solid.css";
+
+a {
+  text-decoration: none;
+  &:hover {
+    font-weight: bold;
+    color: #a22125;
+    text-decoration: none;
+  }
+  color: #41799e;
+}
+
 </style>
