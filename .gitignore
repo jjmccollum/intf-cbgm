@@ -76,7 +76,3 @@ docker/server
 docker/ntg_common
 docker/client
 docker/scripts
-
-#vueJS
-client/build
-!client/build/js/*
