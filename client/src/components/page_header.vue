@@ -1,51 +1,34 @@
 <template>
-  <div class="vm-page-header">
-    <!-- the violet header -->
-    <div class="bs-docs-header">
-      <!-- needs a nested container to expand the violet band to the screen edges -->
-      <h1 class="container d-flex flex-row justify-content-between">
-        <span class="caption">{{ route_meta.caption }}</span>
-        <span class="appname">{{ route_meta.caption === 'Genealogical Queries' ? 'Projects' : current_application.name }}</span>
-      </h1>
-    </div>
 
-    <div
-      class="login-nav container d-flex flex-row justify-content-end bs-docs-container"
-    >
-    <div v-if="route_meta.type != 'index'">
-      <router-link :to="{ name: route_meta.projects.route }">{{
-        route_meta.projects.caption
-      }}</router-link>
-      <span>&#xa0; | &#xa0;</span>
-      <router-link :to="{ name: route_meta.home.route }">{{
-        route_meta.home.caption
-      }}</router-link>
-      <span>&#xa0; | &#xa0;</span>
-      </div>
-      <template v-if="current_user.can_login">
-        <template v-if="is_logged_in">
-          <a href="/user/profile" class="user-profile-link">
-            <span class="fas fa-user" /> {{ current_user.username }}
-          </a>
-          <a href="/user/sign-out" class="user-logout-link">
-            <span class="fas fa-sign-out-alt" /> Sign out
-          </a>
-        </template>
-        <template v-else>
-          <a href="/user/sign-in" class="user-login-link">
-            <span class="fas fa-sign-in-alt" /> Sign in
-          </a>
-        </template>
-      </template>
-    </div>
 
-    <div
-      v-if="!can_read"
-      class="container bs-docs-container login-required-message"
-    >
-      Sorry. You don't have read access to this section.
-    </div>
-  </div>
+<div>
+  <b-navbar type="dark" variant="dark">
+    <b-navbar-nav>
+      <b-nav-item href="#">Home</b-nav-item>
+
+      <!-- Navbar dropdowns -->
+      <b-nav-item-dropdown text="Lang" right>
+        <b-dropdown-item href="#">EN</b-dropdown-item>
+        <b-dropdown-item href="#">ES</b-dropdown-item>
+        <b-dropdown-item href="#">RU</b-dropdown-item>
+        <b-dropdown-item href="#">FA</b-dropdown-item>
+      </b-nav-item-dropdown>
+
+      <b-nav-item-dropdown v-for="i of $store.state.instances" :key="i.application_name" :text="i.application_name" right>
+        <b-dropdown-item href="#">EN</b-dropdown-item>
+        <b-dropdown-item href="#">ES</b-dropdown-item>
+        <b-dropdown-item href="#">RU</b-dropdown-item>
+        <b-dropdown-item href="#">FA</b-dropdown-item>
+      </b-nav-item-dropdown>
+
+
+      <b-nav-item-dropdown text="User" right>
+        <b-dropdown-item href="#">Account</b-dropdown-item>
+        <b-dropdown-item href="#">Settings</b-dropdown-item>
+      </b-nav-item-dropdown>
+    </b-navbar-nav>
+  </b-navbar>
+</div>
 </template>
 
 <script>
@@ -57,8 +40,20 @@
  */
 
 import { mapGetters } from "vuex";
+import { BNavbar } from 'bootstrap-vue/src/components/navbar/navbar';
+import { BNavbarNav } from 'bootstrap-vue/src/components/navbar/navbar-nav';
+import { BNavItem } from 'bootstrap-vue/src/components/nav/nav-item';
+import { BNavItemDropdown } from 'bootstrap-vue/src/components/nav/nav-item-dropdown';
+import { BDropdownItem } from 'bootstrap-vue/src/components/dropdown/dropdown-item';
 
 export default {
+    'components' : {
+      'b-navbar'            : BNavbar,
+      'b-navbar-nav'        : BNavbarNav,
+      'b-nav-item'          : BNavItem,
+      'b-nav-item-dropdown' : BNavItemDropdown,
+      'b-dropdown-item'     : BDropdownItem,
+  },
   data() {
     return {};
   },
