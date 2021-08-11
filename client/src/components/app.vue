@@ -420,6 +420,7 @@ window.addEventListener("hashchange", function() {
 @import "../../node_modules/@fortawesome/fontawesome-free/css/solid.css";
 
 a {
+  font-size: 16px;
   text-decoration: none;
   &:hover {
     font-weight: bold;
@@ -427,6 +428,10 @@ a {
     text-decoration: none;
   }
   color: #41799e;
+}
+
+p {
+  font-size: 16px;
 }
 
 </style>
