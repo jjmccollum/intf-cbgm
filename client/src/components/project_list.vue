@@ -2,21 +2,21 @@
   <div class="vm-project-list">
     <div class="container bs-docs-container">
       <div class="jumbotron">
-        <h1 class="display-4">A program suite for doing CBGM</h1>
+        <h1 class="display-4">A program suite for the CBGM</h1>
         <p class="lead">Coherence-Based Genealogical Method (CBGM)</p>
         <hr class="my-4">
         <img :src="ECMActs" style="float: left; width: 200px; margin: 0 1rem 1rem 0"/>
         <p>The <strong>Coherence-Based Genealogical Method</strong>, developed by Gerd Mink at the
         Institut für Neutestamentliche Textforschung (INTF) in Münster, aims at a
-        scientifically founded reconstruction<br>of the initial text (*Ausgangstext*) of
+        scientifically founded reconstruction of the initial text (*Ausgangstext*) of
         the New Testament tradition, i.e. a hypothesis about the text from which the 
         manuscript transmission started.<br>The fundamental problem posed by the nature
         of the New Testament manuscript tradition is known as contamination, the 
         mutual influence of different strands of transmission on each other.<br>
         Contamination renders the application of conventional stemmatics impossible, 
         and the New Testament manuscript tradition is known to be highly contaminated.<br>
-        The CBGM, however, offers a cure for contamination, thanks to three essential 
-        principles distinguishing it from conventional stemmatics.</p>
+        The CBGM, however, offers a cure for contamination. Three essential principles distinguishing 
+        it from conventional stemmatics: pre-genealogical coherence, genealogical coherence, and stemmatic coherence.</p>
         <br>
         <a class="btn btn-primary btn-lg" href="http://egora.uni-muenster.de/intf/projekte/gsm_aus_en.shtml" target="_blank" role="button">Learn more</a>
       </div>
@@ -53,15 +53,16 @@
       </table>
 
       <br><br>
-      <h4>Docker Installation</h4>
+      <h4>Steps for installing a local, editable version of the CBGM for Acts and Mark</h4>
       <p>
       <ol>
-      <li>Install the free community version of Docker:</li>
+      <li>You need to install the free containerization software <a href="https://www.docker.com/" target='_blank'>Docker</a>:</li>
         <ul>
         <li>for Windows see: <a href="https://docs.docker.com/docker-for-windows/install/" target="_blank">Docker for Windows</a></li>
         <li>for Mac see:  <a href="https://docs.docker.com/docker-for-mac/install/" target="_blank">Docker for Mac</a></li>
         <li>for Debian Linux see:  <a href="https://docs.docker.com/compose/install/" target="_blank">Docker for Debian Linux</a></li>
         </ul>
+        <br><p><strong>Important: </strong>Windows users please use this short guide: <a href="/pdfs/DockerGuideWindows.pdf" target="_blank">Installing the CBGM Tool via Docker on Windows</a><p>
     
     
     
@@ -81,11 +82,16 @@ This will download the Docker containers and initialize the database. It will ta
 
 </ol>
 
-<strong>Note</strong>: All newest docker images can be found at <a href="https://hub.docker.com/r/scdh" target="_blank">https://hub.docker.com/r/scdh</a><br>
-<a href="https://hub.docker.com/r/scdh/intf-cbgm-app-server" target="_blank">intf-cbgm-app-server</a><br>
-<a href="https://hub.docker.com/r/scdh/intf-cbgm-db-server" target="_blank">intf-cbgm-db-server</a><br>
-      
-      </p>
+<img :src="Docker" style="float:left; width:100px; margin-right: 1rem;"/>
+<strong>Note</strong>: All newest docker images can be found at<br><a href="https://hub.docker.com/r/scdh" target="_blank">https://hub.docker.com/r/scdh</a><br>
+	&rarr;<a href="https://hub.docker.com/r/scdh/intf-cbgm-app-server" target="_blank">intf-cbgm-app-server</a><br>
+	&rarr;<a href="https://hub.docker.com/r/scdh/intf-cbgm-db-server" target="_blank">intf-cbgm-db-server</a><br>
+
+<br><br>
+      <h4>Video tutorial for installing a local, editable version of the CBGM (Mac)</h4>
+      <br>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/k0_tlbz_YVQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
       <br><br>
       <h4>Partners</h4>
@@ -134,6 +140,7 @@ import scdh_logo from "../images/scdh-logo.jpg";
 import actsguide from "../images/actsguide.jpg";
 import markguide from "../images/markguide.jpg";
 import ECMActs from "../images/ECMActs.jpg";
+import Docker from "../images/docker.png";
 
 export default {
   data: function() {
@@ -144,7 +151,8 @@ export default {
       scdh_logo: scdh_logo,
       markguide: markguide,
       actsguide: actsguide,
-      ECMActs: ECMActs
+      ECMActs: ECMActs,
+      Docker: Docker
     };
   }
 };
