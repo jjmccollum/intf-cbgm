@@ -73,6 +73,10 @@ export default {
 /* page_header.vue */
 @import "bootstrap-custom";
 
+nav {
+  padding: 0 !important;
+}
+
 .nav-header {
   margin-bottom: 3rem;
 }
