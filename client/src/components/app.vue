@@ -3,6 +3,7 @@
     <page-header></page-header>
     <flash-messages></flash-messages>
     <router-view></router-view>
+    <page-footer></page-footer>
   </div>
 </template>
 
@@ -24,6 +25,7 @@ import url from "url";
 import d3common from "d3_common";
 
 import page_header from "page_header.vue";
+import page_footer from "page_footer.vue";
 import flash_messages from "flash_messages.vue";
 import prj_list from "project_list.vue";
 import index from "index.vue";
@@ -367,6 +369,7 @@ export default {
   },
   components: {
     "page-header": page_header,
+    "page-footer": page_footer,
     "flash-messages": flash_messages
   },
   computed: {
@@ -418,6 +421,21 @@ window.addEventListener("hashchange", function() {
 /* FIXME: this file is huge, maybe pick only the icons we use */
 @import "../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css";
 @import "../../node_modules/@fortawesome/fontawesome-free/css/solid.css";
+
+@font-face { 
+    font-family: "Metawebpro";
+    src: url("../webfonts/metawebpro-normal.woff"); 
+  }
+
+@font-face { 
+    font-family: "MetawebproBold";
+    src: url("../webfonts/metawebpro-bold.woff"); 
+  }
+
+@font-face { 
+  font-family: "WWUSymbol";
+  src: url("../webfonts/wwu_symbol.woff"); 
+}
 
 a {
   font-size: 16px;
