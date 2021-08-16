@@ -67,7 +67,7 @@
                 href="https://www.uni-muenster.de/de/"
                 title="Startseite der WWU"
                 class="claim"
-                >wissen.leben</a
+                >living.knowledge</a
               >
             </div>
           </div>

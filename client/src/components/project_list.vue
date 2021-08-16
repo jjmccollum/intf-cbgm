@@ -185,9 +185,6 @@
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
       ></iframe>
-
-      <br /><br />
-      <h4>Partners</h4>
       
       </div>
     </div>

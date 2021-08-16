@@ -1,34 +1,34 @@
 <template>
+  <div class="container nav-header">
+    <b-navbar>
+      <img
+        src="images/wwu_logo.svg"
+        style="float:left; width:280px; margin-right: 1rem;"
+      />
+      <img
+        src="images/intf2021.jpeg"
+        style="position: absolute; right: 0; margin: 0;"
+      />
+    </b-navbar>
+    <b-navbar class="main-nav">
+      <b-navbar-nav>
+        <b-nav-item href="/">Home</b-nav-item>
 
+        <b-nav-item-dropdown
+          v-for="i of $store.state.instances"
+          :key="i.application_name"
+          :text="i.application_name"
+          right
+        >
+          <b-dropdown-item href="#">Coherence and Textual Flow</b-dropdown-item>
+          <b-dropdown-item href="#">Comparison of Witnesses</b-dropdown-item>
+          <b-dropdown-item href="#">Find Relatives</b-dropdown-item>
+        </b-nav-item-dropdown>
+      <b-nav-item style="position: absolute; right:0;" href="/user/sign-in">Sign In</b-nav-item>
 
-<div>
-  <b-navbar type="dark" variant="dark">
-    <b-navbar-nav>
-      <b-nav-item href="#">Home</b-nav-item>
-
-      <!-- Navbar dropdowns -->
-      <b-nav-item-dropdown text="Lang" right>
-        <b-dropdown-item href="#">EN</b-dropdown-item>
-        <b-dropdown-item href="#">ES</b-dropdown-item>
-        <b-dropdown-item href="#">RU</b-dropdown-item>
-        <b-dropdown-item href="#">FA</b-dropdown-item>
-      </b-nav-item-dropdown>
-
-      <b-nav-item-dropdown v-for="i of $store.state.instances" :key="i.application_name" :text="i.application_name" right>
-        <b-dropdown-item href="#">EN</b-dropdown-item>
-        <b-dropdown-item href="#">ES</b-dropdown-item>
-        <b-dropdown-item href="#">RU</b-dropdown-item>
-        <b-dropdown-item href="#">FA</b-dropdown-item>
-      </b-nav-item-dropdown>
-
-
-      <b-nav-item-dropdown text="User" right>
-        <b-dropdown-item href="#">Account</b-dropdown-item>
-        <b-dropdown-item href="#">Settings</b-dropdown-item>
-      </b-nav-item-dropdown>
-    </b-navbar-nav>
-  </b-navbar>
-</div>
+      </b-navbar-nav>
+    </b-navbar>
+  </div>
 </template>
 
 <script>
@@ -40,19 +40,19 @@
  */
 
 import { mapGetters } from "vuex";
-import { BNavbar } from 'bootstrap-vue/src/components/navbar/navbar';
-import { BNavbarNav } from 'bootstrap-vue/src/components/navbar/navbar-nav';
-import { BNavItem } from 'bootstrap-vue/src/components/nav/nav-item';
-import { BNavItemDropdown } from 'bootstrap-vue/src/components/nav/nav-item-dropdown';
-import { BDropdownItem } from 'bootstrap-vue/src/components/dropdown/dropdown-item';
+import { BNavbar } from "bootstrap-vue/src/components/navbar/navbar";
+import { BNavbarNav } from "bootstrap-vue/src/components/navbar/navbar-nav";
+import { BNavItem } from "bootstrap-vue/src/components/nav/nav-item";
+import { BNavItemDropdown } from "bootstrap-vue/src/components/nav/nav-item-dropdown";
+import { BDropdownItem } from "bootstrap-vue/src/components/dropdown/dropdown-item";
 
 export default {
-    'components' : {
-      'b-navbar'            : BNavbar,
-      'b-navbar-nav'        : BNavbarNav,
-      'b-nav-item'          : BNavItem,
-      'b-nav-item-dropdown' : BNavItemDropdown,
-      'b-dropdown-item'     : BDropdownItem,
+  components: {
+    "b-navbar": BNavbar,
+    "b-navbar-nav": BNavbarNav,
+    "b-nav-item": BNavItem,
+    "b-nav-item-dropdown": BNavItemDropdown,
+    "b-dropdown-item": BDropdownItem
   },
   data() {
     return {};
@@ -72,6 +72,23 @@ export default {
 <style lang="scss">
 /* page_header.vue */
 @import "bootstrap-custom";
+
+.nav-header {
+  margin-bottom: 3rem;
+}
+
+.main-nav {
+  border-bottom: 4px solid;
+}
+
+ul.navbar-nav li.nav-item a.nav-link {
+  font-family: Metawebpro, Verdana, sans-serif;
+  text-transform: uppercase;
+  color: black;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+}
 
 div.vm-page-header {
   background-color: #d2d2d2;
@@ -100,7 +117,8 @@ div.vm-page-header {
     @media print {
       display: none !important;
     }
-    a, span {
+    a,
+    span {
       font-size: 18px;
     }
   }
