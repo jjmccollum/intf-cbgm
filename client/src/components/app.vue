@@ -36,6 +36,7 @@ import checks_list from "checks_list.vue";
 import notes_list from "notes_list.vue";
 import opt_stemma from "optimal_substemma.vue";
 import set_cover from "set_cover.vue";
+import notfound from "notfound.vue";
 
 Vue.use(Vuex);
 Vue.use(VueRouter);
@@ -173,7 +174,9 @@ const router = new VueRouter({
         /* eslint-disable-next-line no-restricted-globals */
         location.href = "http://intf.uni-muenster.de/cbgm/acts/";
       }
-    }
+    },
+
+     { path: '/:pathMatch(.*)*', name: 'notfound', component: notfound },
   ]
 });
 
