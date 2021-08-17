@@ -42,6 +42,7 @@
       <table class="table table-bordered table-hover">
         <tbody>
           <tr>
+            <th></th>
             <th>Project</th>
             <th>Editable</th>
             <th>Description</th>
@@ -53,11 +54,12 @@
             tag="tr"
             :to="'/' + i.application_root"
           >
+          <td style="width:50px; text-align:center;"><i class="fas fa-folder-open" style="font-size: 20px;"></i></td>
             <td class="app_name">
               <a>{{ i.application_name }}</a>
             </td>
-            <td class="can_edit">
-              <span v-if="i.user_can_write" class="fas fa-pen-square" />
+            <td class="can_edit" style="text-align:center;">
+              <span v-if="i.user_can_write" class="fas fa-pen-square" style="color: #41799e;"/>
             </td>
             <td class="app_desc">
               {{ i.application_description }}

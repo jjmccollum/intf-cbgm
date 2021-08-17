@@ -443,12 +443,13 @@ window.addEventListener("hashchange", function() {
 a {
   font-size: 16px;
   text-decoration: none;
+  font-weight: 700;
+  color: #41799e;
   &:hover {
     font-weight: bold;
-    color: #a22125;
-    text-decoration: none;
+    text-decoration: underline;
+    color: #41799e;
   }
-  color: #41799e;
 }
 
 p {

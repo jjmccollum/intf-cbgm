@@ -124,7 +124,7 @@
 import intf_logo from "../images/intf2021.jpeg";
 import awk_logo from "../images/awk-logo-00.png";
 import cceh_logo from "../images/cceh-logo.png";
-import scdh_logo from "../images/scdh-logo.jpg";
+import scdh_logo from "../images/scdh-logo.svg";
 
 export default {
   data() {
@@ -225,6 +225,12 @@ footer {
   text-transform: uppercase;
   .name {
     float: right;
+  }
+  a {
+    color: #3e3e3c;
+    &:hover {
+      color: #3e3e3c;
+    }
   }
 }
 
