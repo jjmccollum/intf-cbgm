@@ -206,7 +206,7 @@ def copy_att (dba, parameters):
             UPDATE att SET hsnr = 1 WHERE hs = 'MT';
             """, parameters)
 
-        if book in ('Acts', 'Mark'):
+        if book in ('Acts', 'Mark', 'Matt'):
             # we cannot delete 'A' because in a negative apparatus it holds unique readings.
             # delete Patristic texts
             execute (conn, """
@@ -690,7 +690,7 @@ def process_sigla (dba, parameters):
             """, parameters)
 
         # DV: added Yasna
-        if book in ('Acts', 'Mark', 'John','Yasna'):
+        if book in ('Acts', 'Mark', 'John','Yasna','Matt'):
             warn (conn, "Hs with more than one hsnr", HS_TO_HSNR_TEST, parameters)
 
             # fix duplicate readings by keeping only the alphabetically lowest labez
@@ -1802,7 +1802,7 @@ if __name__ == '__main__':
                                              # do not match 'A' and 'L2010' !!!
         parameters['re_comm']  = 'T[1-9]'    # commentaries
         parameters['re_labez'] = '^([a-y]|z[u-z])$'
-    if book in ('Mark','Yasna'):
+    if book in ('Mark','Yasna','Matt'):
         parameters['re_hs_t']      = '^(A|([P0L]?[1-9][0-9]*s?(-[1-9])?(C([1-9][a-z]?)?)?[*]?([AKL][1-9]?)?[Vr]*))$'
         parameters['re_hs']        = '^(A|MT|([P0L]?[1-9][0-9]*s?))'
         parameters['re_corr']      = 'C([*]|([1-9][a-z]?))?'  # correctors
