@@ -20,8 +20,8 @@
               Tel: <span>+49 251 83-22581</span><br />Fax:
               <span>+49 251 83-22582</span><br /><a
                 class="u-email"
-                href="mailto:volker.krueger@uni-muenster.de"
-                >volker.krueger@uni-muenster.de</a
+                href="mailto:paulson@uni-muenster.de"
+                >Dr. Gregory S. Paulson</a
               >
             </address>
             <a href="https://www.youtube.com/wwumuenster" target="_blank">
