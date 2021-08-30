@@ -28,8 +28,11 @@
             >{{ link.desc }}</b-dropdown-item
           >
         </b-nav-item-dropdown>
-        <b-nav-item style="position: absolute; right:0;" href="/user/sign-in"
-          >Sign In</b-nav-item
+        <b-nav-item v-if="this.is_logged_in === false" style="position: absolute; right:0;" href="/user/sign-in"
+          >Log In</b-nav-item
+        >
+        <b-nav-item v-if="this.is_logged_in === true" style="position: absolute; right:0;" href="/user/sign-out"
+          >Log Out</b-nav-item
         >
       </b-navbar-nav>
     </b-navbar>
@@ -77,6 +80,7 @@ export default {
       "route_meta"
     ]),
     navlist: function() {
+      console.log(this.is_logged_in);
       // only add public projects to navbar
       let links = this.$store.state.instances.filter((obj) =>
         obj["application_description"].includes("public")
