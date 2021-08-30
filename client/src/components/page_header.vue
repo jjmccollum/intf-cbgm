@@ -80,7 +80,6 @@ export default {
       "route_meta"
     ]),
     navlist: function() {
-      console.log(this.is_logged_in);
       // only add public projects to navbar
       let links = this.$store.state.instances.filter((obj) =>
         obj["application_description"].includes("public")
