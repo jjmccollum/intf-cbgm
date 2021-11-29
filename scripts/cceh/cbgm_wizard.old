@@ -63,15 +63,15 @@ def start(project_data,task_type):
     print('Starting a New Phase with Apparatus Update.')
     print('Step 1 of 8: Writing config file...')
     write_db_config(project_data)
-    # print('Step 2 of 8: Creating new Postgres Database...')
-    # create_new_psql_db(project_data)
+    print('Step 2 of 8: Creating new Postgres Database...')
+    create_new_psql_db(project_data)
     # setting write access of former phase
     if task_type == 'phase':
         project_data = calc_preceding_phase(project_data)
         if project_data['project']['read_only_for_preceding']:
             set_write_access(project_data)
-    # print('Step 3 of 8: Creating mySQL Tables...')
-    # create_new_mysql_db(project_data)
+    print('Step 3 of 8: Creating mySQL Tables...')
+    create_new_mysql_db(project_data)
     print('Step 4 of 8: Running import and prepare scripts...')
     run_prepare_scripts(project_data)
     if task_type == 'phase':
@@ -83,8 +83,8 @@ def start(project_data,task_type):
     run_cbgm_script(project_data)
     print('Step 7 of 8: Adding db to active databases...')
     activate_db(project_data)
-    # print('Step 8 of 8: Cleaning up...')
-    # cleaning_up(project_data)
+    print('Step 8 of 8: Cleaning up...')
+    cleaning_up(project_data)
     print('Done.')
     return project_data
 
@@ -303,11 +303,11 @@ def create_new_mysql_db(project_data):
 
 def run_prepare_scripts(project_data):
     cf = project_data['project']['config_file']
-    # print('Running Import Script.')
-    # os.chdir(project_data['general']['path'])
-    # # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
-    # os.system(
-    #     f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
+    print('Running Import Script.')
+    os.chdir(project_data['general']['path'])
+    # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
+    os.system(
+        f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
     print('Running Prepare Script.')
     os.chdir(project_data['general']['path'])
     os.system(
