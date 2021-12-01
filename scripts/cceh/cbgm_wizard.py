@@ -303,11 +303,11 @@ def create_new_mysql_db(project_data):
 
 def run_prepare_scripts(project_data):
     cf = project_data['project']['config_file']
-    print('Running Import Script.')
-    os.chdir(project_data['general']['path'])
-    # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
-    os.system(
-        f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
+    # print('Running Import Script.')
+    # os.chdir(project_data['general']['path'])
+    # # note: we need "sudo -u ntg" because of some strange key-error, when reading the config file, e.g. "mark_ph33.conf"
+    # os.system(
+    #     f'sudo -u ntg python3 -m scripts.cceh.import -vvv instance/{cf}')
     print('Running Prepare Script.')
     os.chdir(project_data['general']['path'])
     os.system(
