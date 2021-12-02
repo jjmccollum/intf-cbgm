@@ -70,7 +70,7 @@ def start(project_data,task_type):
     write_db_config(project_data)
 
     # creating postgres DB
-    if project_data['project']['create_pg_database']:
+    if project_data['steps']['create_pg_database']:
         print('Creating new Postgres Database...')
         create_new_psql_db(project_data)
 
@@ -81,7 +81,7 @@ def start(project_data,task_type):
             set_write_access(project_data)
 
     # to use fdw we need a mySQL DB
-    if project_data['project']['use_mysql_fdw']:
+    if project_data['steps']['use_mysql_fdw']:
         print('Creating mySQL Tables...')
         create_new_mysql_db(project_data)
         # import from mySQL to psql
@@ -89,12 +89,12 @@ def start(project_data,task_type):
         run_import_script(project_data)
     
     # the prepare script for the cbgm
-    if project_data['project']['run_prepare']:
+    if project_data['steps']['run_prepare']:
         print('Running prepare script...')
         run_prepare_script(project_data)
     
     # load and save edits
-    if project_data['project']['save_and_load_edits']:
+    if project_data['steps']['save_and_load_edits']:
         if task_type == 'phase':
             print('Loading saved edits...')
             save_and_load_edits(project_data)
@@ -102,7 +102,7 @@ def start(project_data,task_type):
             print('Skipping saved edits in new projects...')
 
     # cbgm script
-    if project_data['project']['run_cbgm']:     
+    if project_data['steps']['run_cbgm']:     
         print('Running CBGM script...')
         run_cbgm_script(project_data)
     
