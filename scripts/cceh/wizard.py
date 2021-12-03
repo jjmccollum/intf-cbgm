@@ -55,7 +55,7 @@ def is_number(s):
     except ValueError:
         return False
 
-def start(project_data,task_type):
+def start(project_data,task_type,config):
     """
     starts a new phase with apparatus update (default)
     currently, there is no new phase WITHOUT apparatus update
@@ -70,7 +70,7 @@ def start(project_data,task_type):
     write_db_config(project_data)
 
     # creating postgres DB
-    if project_data['steps']['create_pg_database']:
+    if config.getboolean('steps', 'create_pg_database'): 
         print('Creating new Postgres Database...')
         create_new_psql_db(project_data)
 
@@ -81,7 +81,7 @@ def start(project_data,task_type):
             set_write_access(project_data)
 
     # to use fdw we need a mySQL DB
-    if project_data['steps']['use_mysql_fdw']:
+    if config.getboolean('steps', 'use_mysql_fdw'): 
         print('Creating mySQL Tables...')
         create_new_mysql_db(project_data)
         # import from mySQL to psql
@@ -89,12 +89,12 @@ def start(project_data,task_type):
         run_import_script(project_data)
     
     # the prepare script for the cbgm
-    if project_data['steps']['run_prepare']:
+    if config.getboolean('steps', 'run_prepare'): 
         print('Running prepare script...')
         run_prepare_script(project_data)
     
     # load and save edits
-    if project_data['steps']['save_and_load_edits']:
+    if config.getboolean('steps', 'save_and_load_edits'): 
         if task_type == 'phase':
             print('Loading saved edits...')
             save_and_load_edits(project_data)
@@ -102,8 +102,7 @@ def start(project_data,task_type):
             print('Skipping saved edits in new projects...')
 
     # cbgm script
-    if project_data['steps']['run_cbgm']:     
-        print('Running CBGM script...')
+    if config.getboolean('steps', 'run_cbgm'):  
         run_cbgm_script(project_data)
     
     # final obligatory steps
@@ -337,7 +336,7 @@ def run_prepare_script(project_data):
     print('Running Prepare Script...')
     os.chdir(project_data['general']['path'])
     pf = 'prepare'
-    if project_data['general']['prepare_script_filename']:
+    if project_data['general']['prepare_script_filename'] != 'default':
         pf = project_data['general']['prepare_script_filename']
         os.system(
             f'sudo -u ntg python3 -m scripts.cceh.{pf} -vvv instance/{cf}')
@@ -357,7 +356,7 @@ def save_and_load_edits(project_data):
 
 def run_cbgm_script(project_data):
     cf = project_data['project']['config_file']
-    print('Running CBGM Script.')
+    print('Running CBGM Script...')
     os.chdir(project_data['general']['path'])
     os.system(f'sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/{cf}')
     print('Restarting Server.')
@@ -401,6 +400,6 @@ def main():
     else:
         task_type = 'phase'
 
-    start(project_data,task_type)
+    start(project_data,task_type,config)
 
 main()
