@@ -336,8 +336,11 @@ def run_prepare_script(project_data):
     cf = project_data['project']['config_file']
     print('Running Prepare Script...')
     os.chdir(project_data['general']['path'])
-    os.system(
-        f'sudo -u ntg python3 -m scripts.cceh.prepare -vvv instance/{cf}')
+    pf = 'prepare'
+    if project_data['general']['prepare_script_filename']:
+        pf = project_data['general']['prepare_script_filename']
+        os.system(
+            f'sudo -u ntg python3 -m scripts.cceh.{pf} -vvv instance/{cf}')
 
 def save_and_load_edits(project_data):
     cf = project_data['project']['config_file']

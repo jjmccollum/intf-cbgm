@@ -1185,18 +1185,18 @@ if __name__ == '__main__':
 
     try:
         for step in range (args.range[0], args.range[1] + 1):
-            # if step == 2:
-            #     log (logging.INFO, "Step  2 : Making a working copy of the att and lac tables ...")
-            #     copy_att (dbdest, parameters)
-            #     continue
-            # if step == 3:
-            #     log (logging.INFO, "Step  3 : Processing Commentaries ...")
-            #     process_commentaries (dbdest, parameters)
-            #     continue
-            # if step == 4:
-            #     log (logging.INFO, "Step  4 : Delete corrector hands ...")
-            #     delete_corrector_hands (dbdest, parameters)
-            #     continue
+            if step == 2:
+                log (logging.INFO, "Step  2 : Making a working copy of the att and lac tables ...")
+                copy_att (dbdest, parameters)
+                continue
+            if step == 3:
+                log (logging.INFO, "Step  3 : Processing Commentaries ...")
+                process_commentaries (dbdest, parameters)
+                continue
+            if step == 4:
+                log (logging.INFO, "Step  4 : Delete corrector hands ...")
+                delete_corrector_hands (dbdest, parameters)
+                continue
             if step == 5:
                 log (logging.INFO, "Step  5 : Delete lectionaries ...")
                 delete_lectionaries (dbdest, parameters)
@@ -1219,41 +1219,41 @@ if __name__ == '__main__':
                     print_stats (dbdest, parameters)
                 continue
 
-            # if step == 31:
-            #     log (logging.INFO, "Step 31 : Making a working copy of the CBGM tables ...")
-            #     # copy_genealogical (dbdest, parameters) DV: removed
-            #     copy_nestle       (dbdest, parameters)
-            #     continue
+            if step == 31:
+                log (logging.INFO, "Step 31 : Making a working copy of the CBGM tables ...")
+                # copy_genealogical (dbdest, parameters) DV: removed
+                copy_nestle       (dbdest, parameters)
+                continue
 
-            # if step == 32:
-            #     log (logging.INFO, "Step 32 : Filling the Passages table ...")
-            #     fill_passages_table (dbdest, parameters)
+            if step == 32:
+                log (logging.INFO, "Step 32 : Filling the Passages table ...")
+                fill_passages_table (dbdest, parameters)
 
-            #     log (logging.INFO, "          Filling the Manuscripts table ...")
-            #     fill_manuscripts_table (dbdest, parameters)
+                log (logging.INFO, "          Filling the Manuscripts table ...")
+                fill_manuscripts_table (dbdest, parameters)
 
-            #     log (logging.INFO, "          Filling the Readings table ...")
-            #     fill_readings_table (dbdest, parameters)
+                log (logging.INFO, "          Filling the Readings table ...")
+                fill_readings_table (dbdest, parameters)
 
-            #     log (logging.INFO, "          Filling the Cliques table ...")
-            #     fill_cliques_table (dbdest, parameters)
-            #     continue
+                log (logging.INFO, "          Filling the Cliques table ...")
+                fill_cliques_table (dbdest, parameters)
+                continue
 
             if step == 33:
                 log (logging.INFO, "Step 33 : Filling the LocStem table ...")
                 fill_locstem_table (dbdest, parameters)
                 continue
 
-            # if step == 34:
-            #     log (logging.INFO, "Step 34 : Filling the Apparatus table with a positive apparatus ...")
-            #     fill_apparatus_table (dbdest, parameters)
-            #     mark_invariant_passages (dbdest, parameters)
-            #     continue
+            if step == 34:
+                log (logging.INFO, "Step 34 : Filling the Apparatus table with a positive apparatus ...")
+                fill_apparatus_table (dbdest, parameters)
+                mark_invariant_passages (dbdest, parameters)
+                continue
 
-            # if step == 35:
-            #     log (logging.INFO, "Step 35 : Filling the MsCliques table ...")
-            #     fill_ms_cliques_table (dbdest, parameters)
-            #     continue
+            if step == 35:
+                log (logging.INFO, "Step 35 : Filling the MsCliques table ...")
+                fill_ms_cliques_table (dbdest, parameters)
+                continue
 
             if step == 41:
                 log (logging.INFO, "Step 41 : Building the 'MT' text ...")
