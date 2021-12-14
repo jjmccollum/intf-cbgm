@@ -58,11 +58,12 @@ readings.py is a helper table to get all necesarry readings.
 ## Import csv with Datagrip
 
 Use Jetbrains Datagrip or any method you like.
+Files are pre-build in `/data`.
 
-1. Import att_import.csv 
-2. Import app_import.csv
+1. Import `att_import.csv`  
+2. Import `app_import.csv`  
 3. Notice, that `labezsuf` should not be NULL because of a constraint. Change it to "Empty String" or "/n"
-4. Import att_import_manual.py and app_import_manual.py. Those files include special data for cases, where all three labez are different.
+4. Import `att_import_manual.py` and `app_import_manual.py`. Those files include special data for cases, where all three labez are different.
 
 ## Fill ms_ranges
 
@@ -76,4 +77,10 @@ SELECT ms.ms_id, ch.rg_id, 0
 FROM manuscripts ms
 CROSS JOIN ranges ch
 WHERE ms.ms_id = 212 -- watch for correct ms_id
-```ve
+```
+
+## Run CBGM Skript
+
+If you had a proper dataset before, just run, (with your conf):
+
+`sudo -u ntg python3 -m scripts.cceh.cbgm -vvv instance/mark_ph39.conf`
