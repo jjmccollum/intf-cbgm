@@ -1,14 +1,14 @@
 # Family Feature
 
-Adding the Family Feature manually for Mark
+Adding the Family Feature manually for Mark  
 
-See Issue at: https://zivgitlab.uni-muenster.de/SCDH/intf/ntg/-/issues/12
-Notice: The instance is called `mark_ph39` here.
+See Issue at: https://zivgitlab.uni-muenster.de/SCDH/intf/ntg/-/issues/12  
+Notice: The instance is called `mark_ph39` here.  
 
 ## Create an export
 
-Here we create the `data/result.csv` with this query.
-The IDs of manuscripts are specific for F1 in Mark.
+Here we create the `data/result.csv` with this query.  
+The IDs of manuscripts are specific for F1 in Mark.  
 
 ```sql
 SET search_path TO ntg;
@@ -47,12 +47,12 @@ WHERE labez_of_ms1 = labez_of_ms2
 
 ## Add a new F1 entry in manuscripts
 
-Here we add ms_id = 212 and hsnr = 422111 for hs = 'F1'
-Watch out that ms_id is a serial and shall not be set, that hsnr is an int and hs is a varchar (aka String).
+Here we add ms_id = 212 and hsnr = 422111 for hs = 'F1'  
+Watch out that ms_id is a serial and shall not be set, that hsnr is an int and hs is a varchar (aka String).  
 
 ## Execute family.py
 
-In order to get our importable csv files, we need to run family.py.
+In order to get our importable csv files, we need to run family.py.  
 readings.py is a helper table to get all necesarry readings.
 
 ## Import csv with Datagrip
