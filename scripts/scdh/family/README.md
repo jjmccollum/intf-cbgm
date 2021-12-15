@@ -79,6 +79,16 @@ CROSS JOIN ranges ch
 WHERE ms.ms_id = 212 -- watch for correct ms_id
 ```
 
+## Fill ms_cliques
+
+Use ms_cliques_import.csv to fill ms_cliques for F1.
+Basically, all cliques are 1 for every pass_id.
+
+There's an issue with the user_id() function in the trigger.
+So, make sure to use this before importing:
+
+`ALTER TABLE ms_cliques DISABLE TRIGGER ms_cliques_trigger`
+
 ## Run CBGM Skript
 
 If you had a proper dataset before, just run, (with your conf):
