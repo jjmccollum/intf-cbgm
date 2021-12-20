@@ -1072,11 +1072,12 @@ def build_MT_text (dba, parameters):
                   SELECT pass_id, labez, clique, count (*) AS cnt
                   FROM apparatus_cliques_view a
                   WHERE hsnr IN {byzlist}
+                  AND certainty = 1.0
                   GROUP BY pass_id, labez, clique
                 ) AS q1
                 GROUP BY pass_id
             ) AS q2
-            WHERE mask IN ('{{7}}', '{{6,1}}', '{{5,1,1}}')
+            WHERE mask IN ('{{7}}', '{{6}}', '{{6,1}}', '{{5,1,1}}')
             """, dict (parameters, ms_id = MS_ID_MT, byzlist = byzlist))
 
         # Insert MT as 'zz' where undefined
