@@ -171,6 +171,14 @@
         target="_blank"
         >intf-cbgm-db-server</a
       ><br />
+      <ol>
+          <p>
+              Troubleshooting for MacOS Monterey: Version 12 of MacOS uses port 5000 for AirPlay software, 
+              which means port 5000 cannot be used for Docker. An easy solution is to disable port 5000 on MacOS, 
+              which is described <a href ='https://anandtripathi5.medium.com/port-5000-already-in-use-macos-monterey-issue-d86b02edd36c' 
+              target='_blank'>here.</a> 
+          </p>
+      </ol>
 
       <br /><br />
       <h4>
