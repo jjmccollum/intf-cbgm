@@ -1,9 +1,19 @@
 # Family Feature
 
-Adding the Family Feature manually for Mark  
+## Mark
+
+Adding the Family Feature manually(!) for Mark  
+Note: Automation is in progress...
 
 See Issue at: https://zivgitlab.uni-muenster.de/SCDH/intf/ntg/-/issues/12  
 Notice: The instance is called `mark_ph39` here.  
+
+## Matthew
+
+For Matthew, we are developing a script to automate the process.  
+See `f1-matth.py`.  
+
+# Instructions
 
 ## Create an export
 
@@ -52,7 +62,7 @@ Watch out that ms_id is a serial and shall not be set, that hsnr is an int and h
 
 ## Execute family.py
 
-In order to get our importable csv files, we need to run family.py.  
+In order to get our importable csv files, we need to run f1-mark.py.  
 readings.py is a helper table to get all necesarry readings.
 
 ## Import csv with Datagrip
@@ -60,10 +70,9 @@ readings.py is a helper table to get all necesarry readings.
 Use Jetbrains Datagrip or any method you like.
 Files are pre-build in `/data`.
 
-1. Import `att_import.csv`  
-2. Import `app_import.csv`  
+1. Import `app_import.csv`  
 3. Notice, that `labezsuf` should not be NULL because of a constraint. Change it to "Empty String" or "/n"
-4. Import `att_import_manual.py` and `app_import_manual.py`. Those files include special data for cases, where all three labez are different.
+4. Import `app_import_manual.csv`. This file include special data for cases, where all three labez are different.
 
 ## Fill ms_ranges
 
