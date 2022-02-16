@@ -751,31 +751,31 @@ def fill_manuscripts_table (dba, parameters):
 
     with dba.engine.begin () as conn:
 
-        execute (conn, """
-        TRUNCATE manuscripts RESTART IDENTITY CASCADE
-        """, parameters)
-
-        # The Manuscripts Table
-
-        # ms_id = 1
-        execute (conn, """
-        INSERT INTO manuscripts (hs, hsnr) VALUES ('A', 0)
-        """, parameters)
-
-        # ms_id = 2
-        execute (conn, """
-        SELECT setval ('manuscripts_ms_id_seq', :ms_id_mt, FALSE);
-        INSERT INTO manuscripts (hs, hsnr) VALUES ('MT', 1)
-        """, dict (parameters, ms_id_mt = MS_ID_MT))
-
-        # ms_id = 3, 4, 5, ...
-        execute (conn, """
-        INSERT INTO manuscripts (hs, hsnr)
-        SELECT DISTINCT hs, hsnr
-        FROM att
-        WHERE hsnr >= 100000
-        ORDER BY hsnr
-        """, parameters)
+#        execute (conn, """
+#        TRUNCATE manuscripts RESTART IDENTITY CASCADE
+#        """, parameters)
+#
+#        # The Manuscripts Table
+#
+#        # ms_id = 1
+#        execute (conn, """
+#        INSERT INTO manuscripts (hs, hsnr) VALUES ('A', 0)
+#        """, parameters)
+#
+#        # ms_id = 2
+#        execute (conn, """
+#        SELECT setval ('manuscripts_ms_id_seq', :ms_id_mt, FALSE);
+#        INSERT INTO manuscripts (hs, hsnr) VALUES ('MT', 1)
+#        """, dict (parameters, ms_id_mt = MS_ID_MT))
+#
+#        # ms_id = 3, 4, 5, ...
+#        execute (conn, """
+#        INSERT INTO manuscripts (hs, hsnr)
+#        SELECT DISTINCT hs, hsnr
+#        FROM att
+#        WHERE hsnr >= 100000
+#        ORDER BY hsnr
+#        """, parameters)
 
         # Init the Ms_Ranges Table
 
@@ -1225,12 +1225,12 @@ if __name__ == '__main__':
             #     copy_nestle       (dbdest, parameters)
             #     continue
 
-            # if step == 32:
+            if step == 32:
             #     log (logging.INFO, "Step 32 : Filling the Passages table ...")
             #     fill_passages_table (dbdest, parameters)
 
-            #     log (logging.INFO, "          Filling the Manuscripts table ...")
-            #     fill_manuscripts_table (dbdest, parameters)
+                log (logging.INFO, "          Filling the Manuscripts table ...")
+                fill_manuscripts_table (dbdest, parameters)
 
             #     log (logging.INFO, "          Filling the Readings table ...")
             #     fill_readings_table (dbdest, parameters)
