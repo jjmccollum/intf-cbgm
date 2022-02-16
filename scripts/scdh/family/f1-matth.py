@@ -129,7 +129,8 @@ def process_passages(conn, app_table, ms_id, HS_LIST, REFERENCE_HSS):
                         lesart_list.append(line[3])
                 lesart_list = list(set(lesart_list))
                 if len(lesart_list) > 1:
-                    raise Exception('ERROR: we have multiple lesarten!')
+                    lesart = lesart_list[0] # pick the first
+                    # raise Exception('ERROR: we have multiple lesarten!')
                 if lesart == '': # there is no lesart yet
                     lesart = lesart_list[0]
                 if len(lesart) == 0:
