@@ -9,6 +9,7 @@ HS_LIST_MATT = ('1','22','118','131','205','209','565','872','884','1192','1210'
 
 REFERENCE_HSS = ['1','1582'] # hs
 REFERENCE_MS_IDS = ['11','85'] # ms_id
+HSNR_FOR_F1 = 990010 # this makes F1 follow after A and MT
 HS_LIST = HS_LIST_MATT
 
 # TODO get connection from cfg
@@ -23,16 +24,8 @@ def connect():
     return conn
 
 
-def create_family_manuscript(conn,familyname):
+def create_family_manuscript(conn, familyname, HSNR_FOR_F1):
     ''' Creates an entry in manuscripts table for F1 '''
-    cur = conn.cursor()
-    cur.execute("""
-                SET search_path TO ntg;
-                SELECT * FROM manuscripts ORDER BY hsnr DESC LIMIT 1;
-                """)
-    hsnr = cur.fetchone()[1] + 1
-    cur.close()
-
     # insert a new F1 manuscript
     ms_id = None
     cur = conn.cursor()
@@ -42,7 +35,7 @@ def create_family_manuscript(conn,familyname):
                 (hsnr, hs) VALUES 
                 (%s, %s)
                 RETURNING ms_id;
-                """,(hsnr,familyname))
+                """,(HSNR_FOR_F1,familyname))
     conn.commit()
     ms_id = int(cur.fetchone()[0])
     cur.close()
@@ -250,12 +243,13 @@ def fill_ms_cliques(conn, ms_id):
 
 conn = connect()
 
-try:
-    ms_id = create_family_manuscript(conn,'F1')
-except DataError as e:
-    print(e)
-    conn.close()
-    sys.exit() # stop script
+# try:
+#     ms_id = create_family_manuscript(conn,'F1')
+# except DataError as e:
+#     print(e)
+#     conn.close()
+#     sys.exit() # stop script
+
 
 app_table = get_apparatus_table(conn)
 process_passages(conn, app_table, ms_id, HS_LIST, REFERENCE_HSS)
