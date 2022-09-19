@@ -20,6 +20,10 @@ from helpers import parameters, Passage, get_excluded_ms_ids, \
      make_dot_response, make_png_response
 from checks import congruence
 
+import numpy as np # to support selection and partial sorting of an array of potential-ancestor relationships
+from bitarray import bitarray # support for dynamic bit arrays, which can be modified after initialization (useful for set cover/substemma optimization) and are used to construct succinct data structures
+from succinct.poppy import poppy # support for succinct data structures, which admit constant-time rank queries (useful for dynamic textual flow calculations)
+
 
 bp = flask.Blueprint ('textflow', __name__)
 
@@ -61,23 +65,23 @@ def remove_z_leaves (graph):
 
 
 def textflow (passage_or_id):
-    """ Output a stemma of manuscripts. """
+    """ Output a textual flow digram of manuscripts. """
 
-    labez        = request.args.get ('labez') or ''
-    hyp_a        = request.args.get ('hyp_a') or 'A'
-    connectivity = int (request.args.get ('connectivity') or 10)
-    width        = float (request.args.get ('width') or 0.0)
+    labez        = request.args.get ('labez') or ''             # variation unit index; if not specified, the global textual flow may be desired
+    hyp_a        = request.args.get ('hyp_a') or 'A'            # ID of the witness to treat as the hyparchetype; if not specified, then the Ausgangstext is used 
+    connectivity = int (request.args.get ('connectivity') or 10)# connectivity limit
+    width        = float (request.args.get ('width') or 0.0)    
     fontsize     = float (request.args.get ('fontsize') or 10.0)
     mode         = request.args.get ('mode') or 'sim'
 
-    include      = request.args.getlist ('include[]')   or []
-    fragments    = request.args.getlist ('fragments[]') or []
-    checks       = request.args.getlist ('checks[]') or []
-    var_only     = request.args.getlist ('var_only[]')  or []
+    include      = request.args.getlist ('include[]')   or []   # normally excluded witnesses to include
+    fragments    = request.args.getlist ('fragments[]') or []   # fragmentary witnesses included
+    checks       = request.args.getlist ('checks[]') or []      # congruence checks
+    var_only     = request.args.getlist ('var_only[]')  or []   # only include edges where variation occurs
     cliques      = request.args.getlist ('cliques[]')   or []
 
-    fragments = 'fragments' in fragments
-    checks    = 'checks'    in checks
+    fragments = 'fragments' in fragments  # True if any fragmentary (i.e., less than half extant) witnesses are included
+    checks    = 'checks'    in checks     # True if congruence checks are enabled
     var_only  = 'var_only'  in var_only   # Panel: Coherence at Variant Passages (GraphViz)
     cliques   = 'cliques'   in cliques    # consider or ignore cliques
     leaf_z    = 'Z'         in include    # show leaf z nodes in global textflow?

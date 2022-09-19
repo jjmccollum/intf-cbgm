@@ -9,10 +9,29 @@ import logging
 
 import networkx as nx
 import numpy as np
+from bitarray import bitarray
 
 from ntg_common import db_tools
 from ntg_common.db_tools import execute, executemany, executemany_raw
 from ntg_common.tools import log
+
+"""
+Notes from Joey McCollum, 2022/09/19:
+
+I've added an import statement for the bitarray library, which offers support for dynamic bit arrays.
+These are compact data structures which can be (de)serialized as bytes in the affinities table of the database.
+By encoding shared extant passages (PASS), agreements (EQ), prior readings (W1>W2), posterior readings (W1<W2), 
+unrelated readings (UNREL), and unclear relationships (UNCL) between witnesses at all passages in bit arrays,
+with a position for each passage, we can quickly retrieve all genealogical relationships between any two witnesses.
+This is important for dynamic textual flow computation
+(where we may have to recalculate potential ancestry relationships based on specific ranges of passages)
+and substemma optimization (which reduces to a set cover problem that can be heuristically solved quickly using bit operations).
+The matrices in the CBGM_Params class populated by the methods in this module could be populated using these bit arrays,
+using the bitarray.count() method to get counts of different types of relationships.
+(This could replace the count_by_range method defined in this module.)
+
+For now, I have only added code to write the bit arrays to the affinities table.
+"""
 
 
 class CBGM_Params ():
