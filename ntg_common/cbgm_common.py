@@ -25,7 +25,7 @@ unrelated readings (UNREL), and unclear relationships (UNCL) between witnesses a
 with a position for each passage, we can quickly retrieve all genealogical relationships between any two witnesses.
 This is important for dynamic textual flow computation
 (where we may have to recalculate potential ancestry relationships based on specific ranges of passages)
-and substemma optimization (which reduces to a set cover problem that can be heuristically solved quickly using bit operations).
+and substemma optimization (which reduces to a set cover problem whose heuristic solution can be accelerated with bit arrays).
 The matrices in the CBGM_Params class populated by the methods in this module could be populated using these bit arrays,
 using the bitarray.count() method to get counts of different types of relationships.
 (This could replace the count_by_range method defined in this module.)
@@ -102,6 +102,50 @@ class CBGM_Params ():
 
     """
 
+    # Joey's proposed additions/replacements follow:
+    pass_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscripts corresponding to the row and column indices 
+    are both extant at that passage.
+    Note that the entries along the diagonal, where the row and column represent the same manuscript, 
+    indicate the extant passages of that manuscript by itself.
+    """
+
+    eq_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscripts corresponding to the row and column indices 
+    have the same reading at that passage.
+    """
+
+    parent_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscripts corresponding to the row index
+    has a reading directly prior to that of the manuscript corresponding to the column index
+    (i.e., if there is one edge from the first manuscript's reading to the second manuscript's reading in the local stemma).
+    """
+
+    prior_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscript corresponding to the row index 
+    has a reading prior to that of the manuscript corresponding to the column index.
+    """
+
+    norel_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscripts corresponding to the row and column indices
+    have readings with a common ancestor in the local stemma that is neither of those readings
+    (i.e., if their readings are known to be independent and therefore have no directed relationship).
+    """
+
+    uncl_bitarrays = None
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    and a bit in that position is set if the manuscripts corresponding to the row and column indices
+    have readings with no common ancestor in the local stemma.
+    Note that this relation can only hold if the local stemma is disconnected 
+    (i.e., if there are readings whose source is unclear, meaning that they have the first bit for "?" set in their mask).
+    """
+
+
 
 def create_labez_matrix (dba, parameters, val):
     """Create the :attr:`labez matrix <scripts.cceh.cbgm.CBGM_Params.labez_matrix>`."""
@@ -110,7 +154,7 @@ def create_labez_matrix (dba, parameters, val):
 
         np.set_printoptions (threshold = 30)
 
-        # get passages
+        # get number of all passages (including invariant ones)
         res = execute (conn, """
         SELECT count (*)
         FROM passages
@@ -164,7 +208,7 @@ def create_labez_matrix (dba, parameters, val):
         """, parameters)
 
         for row in res:
-            labez_matrix [row[0], row[1]] = row[2]
+            labez_matrix [row[0], row[1]] = row[2] # i.e., labez_matrix[ms index, passage index] = reading index
 
         # clear matrix where reading is uncertain
         res = execute (conn, """
@@ -174,7 +218,7 @@ def create_labez_matrix (dba, parameters, val):
         """, parameters)
 
         for row in res:
-            labez_matrix [row[0], row[1]] = 0
+            labez_matrix [row[0], row[1]] = 0 # i.e., labez_matrix[ms index, passage index] = 0 (index of ? placeholder)
 
         val.labez_matrix = labez_matrix
 
@@ -231,6 +275,12 @@ def calculate_mss_similarity_preco (_dba, _parameters, val):
     # Matrix range x ms x ms with count of the passages that are equal in both mss
     val.eq_matrix  = np.zeros ((val.n_ranges, val.n_mss, val.n_mss), dtype = np.uint16)
 
+    # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) that are defined in both mss
+    val.pass_bitarrays = {}
+    
+    # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) where both mss agree
+    val.eq_bitarrays = {}
+
     val.range_starts = [ch.start for ch in val.ranges]
     val.range_ends   = [ch.end   for ch in val.ranges]
 
@@ -250,6 +300,9 @@ def calculate_mss_similarity_preco (_dba, _parameters, val):
 
             val.and_matrix[:,j,k] = val.and_matrix[:,k,j] = count_by_range (def_and, val.range_starts, val.range_ends)
             val.eq_matrix[:,j,k]  = val.eq_matrix[:,k,j]  = count_by_range (labez_eq, val.range_starts, val.range_ends)
+
+            val.pass_bitarrays[(j, k)] = bitarray(def_and)
+            val.eq_bitarrays[(j, k)] = bitarray(labez_eq)
 
 
 def calculate_mss_similarity_postco (dba, parameters, val, do_checks = True):
@@ -370,6 +423,10 @@ def calculate_mss_similarity_postco (dba, parameters, val, do_checks = True):
     To test for ancestrality between mss. 1457 and 706 we do a bitwise_and of the
     mask_matrix of 1457 and the ancestor_matrix of 706. If the result is non-zero then
     1457 is ancestral to 706.
+
+    (Question from Joey: If the first bit corresponds to an unknown relationship, 
+    then shouldn't we be checking if the bitwise_and is greater than 1 rather than 0?
+    What if more than one reading is of unknown origin and therefore the ? placeholder is an "ancestor reading" to both?)
 
     .. code-block::
 
@@ -555,10 +612,43 @@ def calculate_mss_similarity_postco (dba, parameters, val, do_checks = True):
         val.parent_matrix,   val.unclear_parent_matrix   = postco (mask_matrix, parent_matrix)
         val.ancestor_matrix, val.unclear_ancestor_matrix = postco (mask_matrix, ancestor_matrix)
 
+        # Added by Joey: I do the same for the bitarrays below, but I populate all four together
+
+        # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) where ms1 has a parent reading to that of ms2
+        val.parent_bitarrays = {}
+        # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) where ms1 is prior to ms2
+        val.prior_bitarrays = {}
+        # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) where ms1 and ms2 are known to be independent
+        val.norel_bitarrays = {}
+        # Dictionary mapping (ms1_id, ms2_id) tuples to bitarrays of passages (over the entire book, not divided into ranges) where ms1 and ms2 have an unclear relationship
+        val.uncl_bitarrays = {}
+        # Loop through all (ordered) pairs of witnesses:
+        for j in range (0, val.n_mss):
+            for k in range (0, val.n_mss):
+                # At which passages is the reading of j a parent to the reading of k?
+                parent = np.bitwise_and (mask_matrix[j], parent_matrix[k]) > 1 # > 1 because "?" does not explain any other reading
+                # At which passages is the reading of j an ancestor to the reading of k?
+                prior = np.bitwise_and (mask_matrix[j], ancestor_matrix[k]) > 1 # > 1 because "?" is not prior to any other reading
+                # At which passages is the reading of j a descendant of the reading of k?
+                posterior = np.bitwise_and (mask_matrix[k], ancestor_matrix[j]) > 1 # > 1 because "?" is not prior to any other reading
+                # At which passages are the readings of j and k independent?
+                indep = np.logical_and (val.def_matrix[j], val.def_matrix[k]) # both readings must be defined
+                indep = np.logical_and (indep, np.not_equal (val.labez_matrix[j], val.labez_matrix[k])) # both readings must be different
+                indep = np.logical_and (indep, np.logical_not (np.logical_or (prior, posterior))) # neither reading can be the ancestor to the other
+                # At which independent passages does neither reading have "?" as a parent?
+                norel = np.logical_and (indep, np.logical_not (np.logical_or (quest_matrix[j], quest_matrix[k])))
+                # At which independent passages does at least one reading have "?" as a parent?
+                uncl = np.logical_and (indep, np.logical_or (quest_matrix[j], quest_matrix[k]))
+                # Now convert these bit lists to bitarrays:
+                val.parent_bitarrays[(j, k)] = bitarray(parent)
+                val.prior_bitarrays[(j, k)] = bitarray(ancestor)
+                val.norel_bitarrays[(j, k)] = bitarray(norel)
+                val.uncl_bitarrays[(j, k)] = bitarrays(uncl)
+
 
 def write_affinity_table (dba, parameters, val):
     """Write back the new affinity (and ms_ranges) tables.
-
+    
     """
 
     with dba.engine.begin () as conn:
@@ -631,3 +721,8 @@ def write_affinity_table (dba, parameters, val):
         log (logging.DEBUG, "ancestor:"  + str (val.ancestor_matrix))
         log (logging.DEBUG, "unclear:"   + str (val.unclear_ancestor_matrix))
         log (logging.DEBUG, "and:"       + str (val.and_matrix))
+
+# NOTE from Joey: You should be able to accelerate textual flow and other queries if you populate a similar table for the bitarrays that I have added here,
+# since deserializing them from table rows is likely to be faster than recalculating them every time 
+# through calls to calculate_mss_similarity_preco and calculate_mss_similarity_postco.
+# The tradeoff will be that such a table will take (O(n_mss² * n_passages) space (although the bit arrays can be serialized more compactly as bytes or machine words).

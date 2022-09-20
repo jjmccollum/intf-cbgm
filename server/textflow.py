@@ -78,7 +78,7 @@ def textflow (passage_or_id):
     fragments    = request.args.getlist ('fragments[]') or []   # fragmentary witnesses included
     checks       = request.args.getlist ('checks[]') or []      # congruence checks
     var_only     = request.args.getlist ('var_only[]')  or []   # only include edges where variation occurs
-    cliques      = request.args.getlist ('cliques[]')   or []
+    cliques      = request.args.getlist ('cliques[]')   or []   # should split attestatations (assumed to arise independently in "cliques" of close witnesses) be treated separately?
 
     fragments = 'fragments' in fragments  # True if any fragmentary (i.e., less than half extant) witnesses are included
     checks    = 'checks'    in checks     # True if congruence checks are enabled
