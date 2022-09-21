@@ -195,7 +195,7 @@ def textflow (passage_or_id, range_start = None, range_end = None):
             # Instead, for each witness in the nodes set, we must retrieve the EQ and PRIOR bitarrays for all other witnesses in the nodes set relative to it,
             # calculate the number of agreements and prior readings for the other witnesses at the subrange of passages,
             # and select the top connectivity_limit bitarrays according to affinity (breaking ties as above).
-
+            Ranks = collections.namedtuple ('Ranks', 'ms_id1 ms_id2 rank')
             # If either end of the passage range is empty, then set it explicitly:
             if range_start is None:
                 range_start = 0
@@ -237,8 +237,6 @@ def textflow (passage_or_id, range_start = None, range_end = None):
                 relationships_array.sort(order=["affinity", "eq", "prior", "posterior"])
                 relationships_array = np.flip(relationships_array) # NumPy only sorts in ascending order, to reverse the sorted array
                 # Then store the resulting relationship entries in namedtuple classes:
-                Ranks = collections.namedtuple ('Ranks', 'ms_id1 ms_id2 rank')
-                ranks = []
                 for i, relationship in enumerate(relationships_array):
                     rank = Ranks._make([relationship["ms_id1"], relationship["ms_id2"], i+1]) # use i + 1 for rank because rank is one-based
                     ranks.append(rank)
