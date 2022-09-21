@@ -9,7 +9,8 @@ import logging
 
 import networkx as nx
 import numpy as np
-from bitarray import bitarray
+from bitarray import bitarray # basic arbitrary-length bit array data structure
+from succinct.poppy import Poppy # succinct data structure with fast rank queries
 
 from ntg_common import db_tools
 from ntg_common.db_tools import execute, executemany, executemany_raw
@@ -30,7 +31,8 @@ The matrices in the CBGM_Params class populated by the methods in this module co
 using the bitarray.count() method to get counts of different types of relationships.
 (This could replace the count_by_range method defined in this module.)
 
-For now, I have only added code to write the bit arrays to the affinities table.
+For now, I have only added dictionaries mapping (ms1_id, ms2_id) tuples to bit arrays as members of the CBGM_Params class,
+and I have added code for populating these dictionaries to the calculate_mss_similarity_preco and calculate_mss_similarity_postco methods.
 """
 
 
@@ -104,7 +106,7 @@ class CBGM_Params ():
 
     # Joey's proposed additions/replacements follow:
     pass_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscripts corresponding to the row and column indices 
     are both extant at that passage.
     Note that the entries along the diagonal, where the row and column represent the same manuscript, 
@@ -112,33 +114,33 @@ class CBGM_Params ():
     """
 
     eq_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscripts corresponding to the row and column indices 
     have the same reading at that passage.
     """
 
     parent_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscripts corresponding to the row index
     has a reading directly prior to that of the manuscript corresponding to the column index
     (i.e., if there is one edge from the first manuscript's reading to the second manuscript's reading in the local stemma).
     """
 
     prior_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscript corresponding to the row index 
     has a reading prior to that of the manuscript corresponding to the column index.
     """
 
     norel_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscripts corresponding to the row and column indices
     have readings with a common ancestor in the local stemma that is neither of those readings
     (i.e., if their readings are known to be independent and therefore have no directed relationship).
     """
 
     uncl_bitarrays = None
-    """A dictionary mapping (ms1_id, ms2_id) tuples to bitarrays, where each bitarray has a position for each passage
+    """A dictionary mapping (ms1_id, ms2_id) tuples to bit arrays, where each bit array has a position for each passage
     and a bit in that position is set if the manuscripts corresponding to the row and column indices
     have readings with no common ancestor in the local stemma.
     Note that this relation can only hold if the local stemma is disconnected 
@@ -246,6 +248,23 @@ def count_by_range (a, range_starts, range_ends):
     cs_end   = cs[range_ends]   # get the sums at the range ends
     return cs_end - cs_start
 
+def bitarray_count_by_range (b, range_start, range_end):
+    """Count true bits over a single range of positions in a succinct bit array.
+
+    This method assumes that b is an instance of the Poppy class from succinct.poppy. 
+    The count of set bits in this class can be calculated in O(1) operations for a given range,
+    regardless of the length of the bit array.
+
+    :param succint.poppy.Poppy a: Input bit array
+    :param int range_start: Starting offset of the range to count.
+    :param int range_end:   Ending offset of the range to count.
+
+    """
+    # If the start of the range is 0, then we only need to calculate rank up to the end of the range:
+    if range_start == 0:
+        return b.rank(range_end)
+    else:
+        return b.rank(range_end) - b.rank(range_start - 1)
 
 def calculate_mss_similarity_preco (_dba, _parameters, val):
     r"""Calculate pre-coherence mss similarity
@@ -301,8 +320,8 @@ def calculate_mss_similarity_preco (_dba, _parameters, val):
             val.and_matrix[:,j,k] = val.and_matrix[:,k,j] = count_by_range (def_and, val.range_starts, val.range_ends)
             val.eq_matrix[:,j,k]  = val.eq_matrix[:,k,j]  = count_by_range (labez_eq, val.range_starts, val.range_ends)
 
-            val.pass_bitarrays[(j, k)] = bitarray(def_and)
-            val.eq_bitarrays[(j, k)] = bitarray(labez_eq)
+            val.pass_bitarrays[(j, k)] = Poppy(bitarray(def_and))
+            val.eq_bitarrays[(j, k)] = Poppy(bitarray(labez_eq))
 
 
 def calculate_mss_similarity_postco (dba, parameters, val, do_checks = True):
@@ -640,10 +659,10 @@ def calculate_mss_similarity_postco (dba, parameters, val, do_checks = True):
                 # At which independent passages does at least one reading have "?" as a parent?
                 uncl = np.logical_and (indep, np.logical_or (quest_matrix[j], quest_matrix[k]))
                 # Now convert these bit lists to bitarrays:
-                val.parent_bitarrays[(j, k)] = bitarray(parent)
-                val.prior_bitarrays[(j, k)] = bitarray(ancestor)
-                val.norel_bitarrays[(j, k)] = bitarray(norel)
-                val.uncl_bitarrays[(j, k)] = bitarrays(uncl)
+                val.parent_bitarrays[(j, k)] = Poppy(bitarray(parent))
+                val.prior_bitarrays[(j, k)] = Poppy(bitarray(ancestor))
+                val.norel_bitarrays[(j, k)] = Poppy(bitarray(norel))
+                val.uncl_bitarrays[(j, k)] = Poppy(bitarrays(uncl))
 
 
 def write_affinity_table (dba, parameters, val):
@@ -725,4 +744,4 @@ def write_affinity_table (dba, parameters, val):
 # NOTE from Joey: You should be able to accelerate textual flow and other queries if you populate a similar table for the bitarrays that I have added here,
 # since deserializing them from table rows is likely to be faster than recalculating them every time 
 # through calls to calculate_mss_similarity_preco and calculate_mss_similarity_postco.
-# The tradeoff will be that such a table will take (O(n_mss² * n_passages) space (although the bit arrays can be serialized more compactly as bytes or machine words).
+# The tradeoff will be that such a table will take O(n_mss² * n_passages) space (although the bit arrays can be serialized more compactly as bytes or machine words).
